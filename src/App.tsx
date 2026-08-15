@@ -1,24 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sidebar } from './components/Sidebar';
 import { HeaderBar } from './components/HeaderBar';
 import { AqiNotificationToast } from './components/AqiNotificationToast';
-import { LiveMapTab } from './components/LiveMapTab';
-import { ForecastTab } from './components/ForecastTab';
-import { AgenticWeatherLLMTab } from './components/AgenticWeatherLLMTab';
-import { PolicySimulatorTab } from './components/PolicySimulatorTab';
-import { HealthAdvisorTab } from './components/HealthAdvisorTab';
-import { OfflineManagerTab } from './components/OfflineManagerTab';
-import { UserProfileTab } from './components/UserProfileTab';
-import { RoleCustomizedFunctionsModal } from './components/RoleCustomizedFunctionsModal';
-import { MultiUserActionSuiteTab } from './components/MultiUserActionSuiteTab';
-import { CleanAirRouteNavigatorTab } from './components/CleanAirRouteNavigatorTab';
-import { PlumeDispersionLabTab } from './components/PlumeDispersionLabTab';
-import { AQIHistoricalDataTab } from './components/AQIHistoricalDataTab';
-import { AtmosphericMLLabTab } from './components/AtmosphericMLLabTab';
-import { GeminiChatbotTab } from './components/GeminiChatbotTab';
-import { AtmosphericImageStudioTab } from './components/AtmosphericImageStudioTab';
 import { AQILogo } from './components/AQILogo';
+import { TabLoadingSkeleton } from './components/TabLoadingSkeleton';
+
+// Code Splitting / Lazy Loaded Modules to improve performance and initial bundle sizes
+const LiveMapTab = lazy(() => import('./components/LiveMapTab').then(m => ({ default: m.LiveMapTab })));
+const ForecastTab = lazy(() => import('./components/ForecastTab').then(m => ({ default: m.ForecastTab })));
+const AgenticWeatherLLMTab = lazy(() => import('./components/AgenticWeatherLLMTab').then(m => ({ default: m.AgenticWeatherLLMTab })));
+const PolicySimulatorTab = lazy(() => import('./components/PolicySimulatorTab').then(m => ({ default: m.PolicySimulatorTab })));
+const HealthAdvisorTab = lazy(() => import('./components/HealthAdvisorTab').then(m => ({ default: m.HealthAdvisorTab })));
+const OfflineManagerTab = lazy(() => import('./components/OfflineManagerTab').then(m => ({ default: m.OfflineManagerTab })));
+const UserProfileTab = lazy(() => import('./components/UserProfileTab').then(m => ({ default: m.UserProfileTab })));
+const RoleCustomizedFunctionsModal = lazy(() => import('./components/RoleCustomizedFunctionsModal').then(m => ({ default: m.RoleCustomizedFunctionsModal })));
+const MultiUserActionSuiteTab = lazy(() => import('./components/MultiUserActionSuiteTab').then(m => ({ default: m.MultiUserActionSuiteTab })));
+const CleanAirRouteNavigatorTab = lazy(() => import('./components/CleanAirRouteNavigatorTab').then(m => ({ default: m.CleanAirRouteNavigatorTab })));
+const PlumeDispersionLabTab = lazy(() => import('./components/PlumeDispersionLabTab').then(m => ({ default: m.PlumeDispersionLabTab })));
+const AQIHistoricalDataTab = lazy(() => import('./components/AQIHistoricalDataTab').then(m => ({ default: m.AQIHistoricalDataTab })));
+const AtmosphericMLLabTab = lazy(() => import('./components/AtmosphericMLLabTab').then(m => ({ default: m.AtmosphericMLLabTab })));
+const GeminiChatbotTab = lazy(() => import('./components/GeminiChatbotTab').then(m => ({ default: m.GeminiChatbotTab })));
+const AtmosphericImageStudioTab = lazy(() => import('./components/AtmosphericImageStudioTab').then(m => ({ default: m.AtmosphericImageStudioTab })));
 
 import { 
   AQIMeasurement, 
@@ -287,149 +290,153 @@ export default function App() {
               transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
               className="w-full h-full min-h-0 flex-1 flex flex-col overflow-hidden relative z-10"
             >
-              {activeTab === 'gemini_chat' && (
-                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
-                  <GeminiChatbotTab
+              <Suspense fallback={<TabLoadingSkeleton title={activeTab.replace('_', ' ').toUpperCase()} />}>
+                {activeTab === 'gemini_chat' && (
+                  <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                    <GeminiChatbotTab
+                      currentCityData={currentCityData}
+                    />
+                  </div>
+                )}
+
+                {activeTab === 'image_studio' && (
+                  <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                    <AtmosphericImageStudioTab
+                      currentCityData={currentCityData}
+                    />
+                  </div>
+                )}
+
+                {activeTab === 'route_nav' && (
+                  <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                    <CleanAirRouteNavigatorTab
+                      currentCityData={currentCityData}
+                    />
+                  </div>
+                )}
+
+                {activeTab === 'plume_lab' && (
+                  <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                    <PlumeDispersionLabTab
+                      currentCityData={currentCityData}
+                    />
+                  </div>
+                )}
+
+                {activeTab === 'multi_user' && (
+                  <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                    <MultiUserActionSuiteTab
+                      currentCityData={currentCityData}
+                    />
+                  </div>
+                )}
+
+                {activeTab === 'map' && (
+                  <LiveMapTab
                     currentCityData={currentCityData}
+                    gpsPos={gpsPos}
+                    onDownloadOfflineRegion={handleDownloadOfflineRegion}
+                    isOffline={isOffline}
+                    onSelectCity={(id) => setSelectedCityId(id)}
                   />
-                </div>
-              )}
+                )}
 
-              {activeTab === 'image_studio' && (
-                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
-                  <AtmosphericImageStudioTab
-                    currentCityData={currentCityData}
-                  />
-                </div>
-              )}
+                {activeTab === 'ml_lab' && (
+                  <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                    <AtmosphericMLLabTab
+                      currentCityData={currentCityData}
+                    />
+                  </div>
+                )}
 
-              {activeTab === 'route_nav' && (
-                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
-                  <CleanAirRouteNavigatorTab
-                    currentCityData={currentCityData}
-                  />
-                </div>
-              )}
+                {activeTab === 'forecast' && (
+                  <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                    <ForecastTab
+                      currentCityData={currentCityData}
+                      forecastPoints={MOCK_72H_FORECAST}
+                      onTriggerAIPrediction={handleTriggerAIPrediction}
+                      aiReportMarkdown={aiReportMarkdown}
+                      isLoadingAI={isLoadingForecastAI}
+                    />
+                  </div>
+                )}
 
-              {activeTab === 'plume_lab' && (
-                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
-                  <PlumeDispersionLabTab
-                    currentCityData={currentCityData}
-                  />
-                </div>
-              )}
+                {activeTab === 'historical' && (
+                  <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                    <AQIHistoricalDataTab
+                      currentCityData={currentCityData}
+                    />
+                  </div>
+                )}
 
-              {activeTab === 'multi_user' && (
-                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
-                  <MultiUserActionSuiteTab
-                    currentCityData={currentCityData}
-                  />
-                </div>
-              )}
+                {activeTab === 'agent_llm' && (
+                  <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                    <AgenticWeatherLLMTab
+                      currentCityData={currentCityData}
+                    />
+                  </div>
+                )}
 
-              {activeTab === 'map' && (
-                <LiveMapTab
-                  currentCityData={currentCityData}
-                  gpsPos={gpsPos}
-                  onDownloadOfflineRegion={handleDownloadOfflineRegion}
-                  isOffline={isOffline}
-                  onSelectCity={(id) => setSelectedCityId(id)}
-                />
-              )}
+                {activeTab === 'simulator' && (
+                  <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                    <PolicySimulatorTab
+                      currentCityName={currentCityData.cityName}
+                      onRunSimulation={handleRunPolicySimulation}
+                      simulationResult={simulationResult}
+                      isSimulating={isSimulatingPolicy}
+                    />
+                  </div>
+                )}
 
-              {activeTab === 'ml_lab' && (
-                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
-                  <AtmosphericMLLabTab
-                    currentCityData={currentCityData}
-                  />
-                </div>
-              )}
+                {activeTab === 'health' && (
+                  <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                    <HealthAdvisorTab
+                      currentCityData={currentCityData}
+                      user={user}
+                      onUpdateUserHealth={(conditions) => setUser(prev => ({ ...prev, healthConditions: conditions }))}
+                      onSendAIChat={handleSendAIChat}
+                    />
+                  </div>
+                )}
 
-              {activeTab === 'forecast' && (
-                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
-                  <ForecastTab
-                    currentCityData={currentCityData}
-                    forecastPoints={MOCK_72H_FORECAST}
-                    onTriggerAIPrediction={handleTriggerAIPrediction}
-                    aiReportMarkdown={aiReportMarkdown}
-                    isLoadingAI={isLoadingForecastAI}
-                  />
-                </div>
-              )}
+                {activeTab === 'offline' && (
+                  <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                    <OfflineManagerTab
+                      isOffline={isOffline}
+                      setIsOffline={handleSetOffline}
+                      offlineRegions={offlineRegions}
+                      onToggleDownloadRegion={handleToggleDownloadRegion}
+                      onClearOfflineCache={handleClearOfflineCache}
+                    />
+                  </div>
+                )}
 
-              {activeTab === 'historical' && (
-                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
-                  <AQIHistoricalDataTab
-                    currentCityData={currentCityData}
-                  />
-                </div>
-              )}
+                {activeTab === 'profile' && (
+                  <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                    <UserProfileTab
+                      user={user}
+                      auditLogs={auditLogs}
+                      onUpdateUser={handleUpdateUser}
+                      onToggleMFA={handleToggleMFA}
+                    />
+                  </div>
+                )}
+              </Suspense>
+            </motion.div>
+          </AnimatePresence>
+        </main>
 
-              {activeTab === 'agent_llm' && (
-                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
-                  <AgenticWeatherLLMTab
-                    currentCityData={currentCityData}
-                  />
-                </div>
-              )}
-
-              {activeTab === 'simulator' && (
-                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
-                  <PolicySimulatorTab
-                    currentCityName={currentCityData.cityName}
-                    onRunSimulation={handleRunPolicySimulation}
-                    simulationResult={simulationResult}
-                    isSimulating={isSimulatingPolicy}
-                  />
-                </div>
-              )}
-
-            {activeTab === 'health' && (
-              <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
-                <HealthAdvisorTab
-                  currentCityData={currentCityData}
-                  user={user}
-                  onUpdateUserHealth={(conditions) => setUser(prev => ({ ...prev, healthConditions: conditions }))}
-                  onSendAIChat={handleSendAIChat}
-                />
-              </div>
-            )}
-
-            {activeTab === 'offline' && (
-              <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
-                <OfflineManagerTab
-                  isOffline={isOffline}
-                  setIsOffline={handleSetOffline}
-                  offlineRegions={offlineRegions}
-                  onToggleDownloadRegion={handleToggleDownloadRegion}
-                  onClearOfflineCache={handleClearOfflineCache}
-                />
-              </div>
-            )}
-
-            {activeTab === 'profile' && (
-              <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
-                <UserProfileTab
-                  user={user}
-                  auditLogs={auditLogs}
-                  onUpdateUser={handleUpdateUser}
-                  onToggleMFA={handleToggleMFA}
-                />
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </main>
-
-      {/* Multi-User Role Customized Functions Modal */}
-      {showRoleModal && (
-        <RoleCustomizedFunctionsModal
-          user={user}
-          currentCityData={currentCityData}
-          onRoleChange={handleRoleChange}
-          onClose={() => setShowRoleModal(false)}
-        />
-      )}
+        {/* Multi-User Role Customized Functions Modal */}
+        {showRoleModal && (
+          <Suspense fallback={null}>
+            <RoleCustomizedFunctionsModal
+              user={user}
+              currentCityData={currentCityData}
+              onRoleChange={handleRoleChange}
+              onClose={() => setShowRoleModal(false)}
+            />
+          </Suspense>
+        )}
     </div>
   </div>
 );

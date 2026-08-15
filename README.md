@@ -1,6 +1,19 @@
 # AuraPredict AI — Enterprise Atmospheric Intelligence & Proactive Mitigation Platform
 
+[![AuraPredict CI Quality Gate](https://github.com/aryansharma/aurapredict-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/aryansharma/aurapredict-ai/actions/workflows/ci.yml)
+[![CodeQL Security Scan](https://github.com/aryansharma/aurapredict-ai/actions/workflows/codeql.yml/badge.svg)](https://github.com/aryansharma/aurapredict-ai/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Node Version](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-brightgreen.svg)](https://nodejs.org)
+[![Docker Support](https://img.shields.io/badge/Docker-Multi--Stage-blue)](Dockerfile)
+
 AuraPredict AI is a full-stack, enterprise-grade generative spatio-temporal air quality forecasting, atmospheric physics modeling, multi-turn AI reasoning, and proactive clean-air mitigation system. It combines physics-informed machine learning, real-time GPS telemetry, offline edge GIS mapping, exposure-minimizing route navigation, multi-agent climate consensus swarms, Gemini multi-turn reasoning with High Thinking mode, speech-to-text audio transcription, synthetic satellite image diffusion with 8 aspect ratios, and GenAI policy simulation.
+
+---
+
+## 👥 Lead Maintainer & Support
+- **Maintainer:** Aryan Sharma
+- **Contact:** `aryansharmacse354@gmail.com`
+- **License:** MIT Open-Source License
 
 ---
 
@@ -204,9 +217,36 @@ npm run dev
 ```
 Open `http://localhost:3000` in your browser.
 
-### 3. Production Build
-Compile the frontend static assets and server bundle:
+### 3. Automated Quality Gate & Testing
+Run typechecking, unit tests, atmospheric physics validations, and API integration suites:
 ```bash
+# Static type checking
+npm run lint
+
+# Automated test suite execution (Vitest + Supertest)
+npm run test
+
+# Continuous watch test runner
+npm run test:watch
+```
+
+### 4. Database Seeding
+Initialize sample environmental profiles and historical audit logs:
+```bash
+npm run seed
+```
+
+### 5. Production Build & Container Execution
+Compile the frontend static assets and backend CommonJS bundle:
+```bash
+# Build production artifact
 npm run build
+
+# Start production server
 npm start
+```
+
+Or deploy using Docker Compose:
+```bash
+docker-compose up --build -d
 ```

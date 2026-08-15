@@ -1,20 +1,100 @@
 import express from 'express';
 import path from 'path';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type, ThinkingLevel } from '@google/genai';
 import dotenv from 'dotenv';
-import { INITIAL_USER_PROFILES, INITIAL_SECURITY_LOGS, CITIES_AQI_DATA, MOCK_72H_FORECAST } from './src/data/mockData';
+import { CITIES_AQI_DATA, MOCK_72H_FORECAST } from './src/data/mockData';
 import { UserProfile, SecurityAuditLog } from './src/types';
+import { db, hashPassword, verifyPassword } from './server/db';
 
 dotenv.config();
 
-const app = express();
+export const app = express();
 const PORT = 3000;
+
+// Security Middleware (Helmet + CORS)
+app.use(helmet({
+  contentSecurityPolicy: false, // Permit dynamic map tiles and SVG data URIs
+  crossOriginEmbedderPolicy: false
+}));
+
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : true,
+  credentials: true
+}));
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// ==========================================
+// RATE LIMITING & SECURITY SAFEGUARDS
+// ==========================================
+const generalApiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 180, // Limit each IP to 180 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please slow down your request rate.' }
+});
+
+const aiApiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 50, // Limit AI queries to 50/minute per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Atmospheric AI query quota threshold reached for this minute. Please wait a moment.' }
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // Limit login/register attempts
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many authentication attempts. Please try again after 15 minutes.' }
+});
+
+// Apply rate limiters
+app.use('/api/', generalApiLimiter);
+app.use('/api/gemini/', aiApiLimiter);
+app.use('/api/predict/', aiApiLimiter);
+app.use('/api/policy/simulate', aiApiLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+
+// ==========================================
+// HEALTH & MONITORING ENDPOINTS
+// ==========================================
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    uptimeSeconds: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+    version: '1.0.0',
+    geminiConfigured: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MOCK_KEY_FOR_LOCAL'),
+    storageStatus: 'connected'
+  });
+});
+
+app.get('/api/metrics', (req, res) => {
+  res.json({
+    activeUsersCount: db.getUsers().length,
+    auditLogsCount: db.getAuditLogs().length,
+    savedSimulationsCount: db.getSavedSimulations().length,
+    savedRoutesCount: db.getSavedRoutes().length,
+    memoryUsageMB: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Initialize Gemini SDK with telemetry header
+const isGeminiKeyProvided = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MOCK_KEY_FOR_LOCAL');
+if (!isGeminiKeyProvided) {
+  console.info('[Security Notice] GEMINI_API_KEY is not set or in test mode. Fallback physics & spatial synthesis engines will serve requests deterministically.');
+}
+
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || 'MOCK_KEY_FOR_LOCAL',
   httpOptions: {
@@ -25,7 +105,7 @@ const ai = new GoogleGenAI({
 });
 
 // Helper to safely parse JSON responses from Gemini with robust markdown cleaning & fallback support
-function cleanAndParseJSON<T>(text: string | undefined, fallback: T): T {
+export function cleanAndParseJSON<T>(text: string | undefined, fallback: T): T {
   if (!text) return fallback;
   try {
     let cleaned = text.trim();
@@ -54,13 +134,13 @@ function cleanAndParseJSON<T>(text: string | undefined, fallback: T): T {
 
 // Resilient Gemini Execution with Candidate Cascade & Automatic Retry
 // Using currently supported Gemini SDK models: 'gemini-3.7-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'
-const CANDIDATE_GEMINI_MODELS = [
+export const CANDIDATE_GEMINI_MODELS = [
   'gemini-3.7-flash',
   'gemini-3.1-flash-lite',
   'gemini-flash-latest'
 ];
 
-async function callGeminiResiliently(params: {
+export async function callGeminiResiliently(params: {
   contents: any;
   config?: any;
   preferredModel?: string;
@@ -101,146 +181,262 @@ async function callGeminiResiliently(params: {
   };
 }
 
-// In-Memory Database for Users & Audit Logs
-let userDb: UserProfile[] = [...INITIAL_USER_PROFILES];
-let auditLogsDb: SecurityAuditLog[] = [...INITIAL_SECURITY_LOGS];
-let currentSessionUser: UserProfile = userDb[0];
-
 // ==========================================
-// AUTHENTICATION & PROFILE API ENDPOINTS
+// PERSISTENT AUTHENTICATION & PROFILE API ENDPOINTS
 // ==========================================
 
-// Register New Profile
-app.post('/api/auth/register', (req, res) => {
-  const { name, email, role, password, healthConditions, alertThresholdAQI } = req.body;
-  if (!email || !password || !name) {
-    return res.status(400).json({ error: 'Name, email, and password are required.' });
+// Helper to extract authenticated user from Bearer header or fallback to default session
+function getAuthenticatedUser(req: express.Request): UserProfile {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    const session = db.getSession(token);
+    if (session) {
+      const user = db.getUserById(session.userId);
+      if (user) return user;
+    }
   }
+  const users = db.getUsers();
+  return users[0];
+}
 
-  const existing = userDb.find(u => u.email.toLowerCase() === email.toLowerCase());
-  if (existing) {
-    return res.status(400).json({ error: 'User with this email already exists.' });
-  }
+// Register New Account with PBKDF2 Password Hashing
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { name, email, role, password, healthConditions, alertThresholdAQI } = req.body;
+    if (!email || !password || !name) {
+      return res.status(400).json({ error: 'Name, email, and password are required.' });
+    }
 
-  const newUser: UserProfile = {
-    id: `usr_${Date.now()}`,
-    name,
-    email,
-    role: role || 'citizen',
-    healthConditions: healthConditions || [],
-    alertThresholdAQI: alertThresholdAQI || 120,
-    mfaEnabled: true,
-    mfaMethod: 'app',
-    savedLocations: [],
-    offlineRegions: ['off_delhi_core'],
-    lastLogin: new Date().toISOString(),
-    createdAt: new Date().toISOString()
-  };
+    const existing = db.getUserByEmail(email);
+    if (existing) {
+      return res.status(400).json({ error: 'An account with this email address already exists.' });
+    }
 
-  userDb.push(newUser);
-  currentSessionUser = newUser;
+    const { hash, salt } = hashPassword(password);
+    const newUser = await db.createUser({
+      id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      name,
+      email,
+      role: role || 'citizen',
+      healthConditions: healthConditions || [],
+      alertThresholdAQI: alertThresholdAQI || 120,
+      mfaEnabled: true,
+      mfaMethod: 'app',
+      savedLocations: [],
+      offlineRegions: ['off_delhi_core'],
+      lastLogin: new Date().toISOString(),
+      passwordHash: hash,
+      salt
+    });
 
-  const logEntry: SecurityAuditLog = {
-    id: `log_${Date.now()}`,
-    timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-    event: 'New Account Created & Session Standard Handshake',
-    ipAddress: req.ip || '127.0.0.1',
-    location: 'Encrypted Node Client',
-    device: 'AuraPredict Secure Auth Module',
-    status: 'success'
-  };
-  auditLogsDb.unshift(logEntry);
-
-  res.json({ token: `jwt_sec_${Date.now()}_${newUser.id}`, user: newUser, auditLog: logEntry });
-});
-
-// Login
-app.post('/api/auth/login', (req, res) => {
-  const { email, password } = req.body;
-  const user = userDb.find(u => u.email.toLowerCase() === (email || '').toLowerCase());
-
-  if (!user) {
-    const failedLog: SecurityAuditLog = {
-      id: `log_${Date.now()}`,
-      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-      event: `Failed Login Attempt (${email})`,
+    const session = await db.createSession(newUser.id, newUser.email, newUser.role, req.ip, req.headers['user-agent']);
+    const logEntry = await db.addAuditLog({
+      event: `New Account Created (${newUser.email}) with PBKDF2 Encryption`,
       ipAddress: req.ip || '127.0.0.1',
-      location: 'Unknown Client',
-      device: 'AuraPredict Web Client',
-      status: 'failed'
-    };
-    auditLogsDb.unshift(failedLog);
-    return res.status(401).json({ error: 'Invalid email or credentials.' });
+      location: 'Encrypted Node Database',
+      device: req.headers['user-agent'] || 'AuraPredict Web Suite',
+      status: 'success'
+    });
+
+    // Strip out password hash & salt for client response
+    const { passwordHash, salt: _, ...safeUser } = newUser;
+    res.json({ token: session.token, user: safeUser, auditLog: logEntry });
+  } catch (err: any) {
+    console.error('Register error:', err);
+    res.status(500).json({ error: 'Registration failed due to an internal error.' });
   }
-
-  user.lastLogin = new Date().toISOString();
-  currentSessionUser = user;
-
-  const successLog: SecurityAuditLog = {
-    id: `log_${Date.now()}`,
-    timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-    event: 'Authenticated via SHA256 MFA Session Handshake',
-    ipAddress: req.ip || '127.0.0.1',
-    location: 'Verified User Session',
-    device: 'AuraPredict Mobile/Web Suite',
-    status: 'success'
-  };
-  auditLogsDb.unshift(successLog);
-
-  res.json({ token: `jwt_sec_${Date.now()}_${user.id}`, user, auditLogs: auditLogsDb.slice(0, 10) });
 });
 
-// Get Current Profile
+// Login with Cryptographic Salt & Hash Verification
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = db.getUserByEmail(email || '');
+
+    if (!user) {
+      const failedLog = await db.addAuditLog({
+        event: `Failed Login Attempt (Unknown User: ${email})`,
+        ipAddress: req.ip || '127.0.0.1',
+        location: 'Unknown Client',
+        device: req.headers['user-agent'] || 'AuraPredict Web Client',
+        status: 'failed'
+      });
+      return res.status(401).json({ error: 'Invalid email or credentials.' });
+    }
+
+    // Verify Password Hash
+    const isPasswordValid = user.passwordHash && user.salt 
+      ? verifyPassword(password || '', user.passwordHash, user.salt)
+      : password === 'AuraPredict2026!'; // legacy compatibility for demo accounts
+
+    if (!isPasswordValid) {
+      await db.addAuditLog({
+        event: `Failed Authentication Attempt for ${email}`,
+        ipAddress: req.ip || '127.0.0.1',
+        location: 'Security Core',
+        device: req.headers['user-agent'] || 'AuraPredict Web Client',
+        status: 'failed'
+      });
+      return res.status(401).json({ error: 'Invalid email or credentials.' });
+    }
+
+    await db.updateUser(user.id, { lastLogin: new Date().toISOString() });
+    const session = await db.createSession(user.id, user.email, user.role, req.ip, req.headers['user-agent']);
+
+    const successLog = await db.addAuditLog({
+      event: `Authenticated via PBKDF2/SHA512 Session Handshake (${user.email})`,
+      ipAddress: req.ip || '127.0.0.1',
+      location: 'Verified User Node',
+      device: req.headers['user-agent'] || 'AuraPredict Client Suite',
+      status: 'success'
+    });
+
+    const { passwordHash, salt, ...safeUser } = user;
+    res.json({ token: session.token, user: safeUser, auditLogs: db.getAuditLogs().slice(0, 10) });
+  } catch (err: any) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Authentication failed.' });
+  }
+});
+
+// Get Current Profile & Audit Logs
 app.get('/api/auth/me', (req, res) => {
-  res.json({ user: currentSessionUser, auditLogs: auditLogsDb.slice(0, 10) });
+  const currentUser = getAuthenticatedUser(req);
+  const { passwordHash, salt, ...safeUser } = currentUser as any;
+  res.json({ user: safeUser, auditLogs: db.getAuditLogs().slice(0, 15) });
+});
+
+// List All Registered Profiles (Admin / Multi-role switcher)
+app.get('/api/auth/users', (req, res) => {
+  const users = db.getUsers().map(u => {
+    const { passwordHash, salt, ...safe } = u;
+    return safe;
+  });
+  res.json({ users });
 });
 
 // Update Profile & Health Conditions
-app.post('/api/auth/update-profile', (req, res) => {
-  const { name, healthConditions, alertThresholdAQI, role } = req.body;
-  if (currentSessionUser) {
-    if (name) currentSessionUser.name = name;
-    if (healthConditions) currentSessionUser.healthConditions = healthConditions;
-    if (alertThresholdAQI !== undefined) currentSessionUser.alertThresholdAQI = Number(alertThresholdAQI);
-    if (role) currentSessionUser.role = role;
+app.post('/api/auth/update-profile', async (req, res) => {
+  try {
+    const currentUser = getAuthenticatedUser(req);
+    const { name, healthConditions, alertThresholdAQI, role } = req.body;
 
-    const logEntry: SecurityAuditLog = {
-      id: `log_${Date.now()}`,
-      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-      event: 'Profile Health Profile & Security Threshold Updated',
+    const updates: Partial<UserProfile> = {};
+    if (name) updates.name = name;
+    if (healthConditions) updates.healthConditions = healthConditions;
+    if (alertThresholdAQI !== undefined) updates.alertThresholdAQI = Number(alertThresholdAQI);
+    if (role) updates.role = role;
+
+    const updatedUser = await db.updateUser(currentUser.id, updates);
+    const logEntry = await db.addAuditLog({
+      event: `Profile Health & Risk Threshold Updated for ${currentUser.email}`,
       ipAddress: req.ip || '127.0.0.1',
-      location: 'User Settings Panel',
-      device: 'AuraPredict Encrypted Web Storage',
+      location: 'User Settings Console',
+      device: req.headers['user-agent'] || 'AuraPredict Encrypted Storage',
       status: 'success'
-    };
-    auditLogsDb.unshift(logEntry);
+    });
 
-    return res.json({ user: currentSessionUser, auditLog: logEntry });
+    if (updatedUser) {
+      const { passwordHash, salt, ...safeUser } = updatedUser;
+      return res.json({ user: safeUser, auditLog: logEntry });
+    }
+    res.status(404).json({ error: 'User profile not found.' });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Profile update failed.' });
   }
-  res.status(401).json({ error: 'No active session found.' });
 });
 
 // Toggle MFA
-app.post('/api/auth/mfa-toggle', (req, res) => {
-  const { enabled, method } = req.body;
-  if (currentSessionUser) {
-    currentSessionUser.mfaEnabled = Boolean(enabled);
-    if (method) currentSessionUser.mfaMethod = method;
+app.post('/api/auth/mfa-toggle', async (req, res) => {
+  try {
+    const currentUser = getAuthenticatedUser(req);
+    const { enabled, method } = req.body;
 
-    const logEntry: SecurityAuditLog = {
-      id: `log_${Date.now()}`,
-      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-      event: `Multi-Factor Authentication ${enabled ? 'Enabled' : 'Disabled'} (${method || 'app'})`,
+    const updatedUser = await db.updateUser(currentUser.id, {
+      mfaEnabled: Boolean(enabled),
+      mfaMethod: method || currentUser.mfaMethod || 'app'
+    });
+
+    const logEntry = await db.addAuditLog({
+      event: `Multi-Factor Authentication ${enabled ? 'Enabled' : 'Disabled'} (${method || 'app'}) for ${currentUser.email}`,
       ipAddress: req.ip || '127.0.0.1',
       location: 'Security Core Manager',
-      device: 'AuraPredict Key Vault',
+      device: req.headers['user-agent'] || 'AuraPredict Key Vault',
       status: 'success'
-    };
-    auditLogsDb.unshift(logEntry);
+    });
 
-    return res.json({ user: currentSessionUser, auditLog: logEntry });
+    if (updatedUser) {
+      const { passwordHash, salt, ...safeUser } = updatedUser;
+      return res.json({ user: safeUser, auditLog: logEntry });
+    }
+    res.status(404).json({ error: 'User not found.' });
+  } catch (err: any) {
+    res.status(500).json({ error: 'MFA update failed.' });
   }
-  res.status(401).json({ error: 'No active session.' });
+});
+
+// ==========================================
+// PERSISTENT SIMULATIONS & SAVED ROUTES APIS
+// ==========================================
+app.get('/api/simulations', (req, res) => {
+  const currentUser = getAuthenticatedUser(req);
+  res.json({ simulations: db.getSavedSimulations(currentUser.id) });
+});
+
+app.post('/api/simulations/save', async (req, res) => {
+  try {
+    const currentUser = getAuthenticatedUser(req);
+    const { cityId, cityName, result } = req.body;
+    if (!result) return res.status(400).json({ error: 'Simulation result is required.' });
+
+    const record = await db.saveSimulation(currentUser.id, cityId || 'delhi', cityName || 'Delhi NCR', result);
+    await db.addAuditLog({
+      event: `Policy Simulation Saved: ${result.scenarioName || 'Custom'} (${cityName || 'Delhi NCR'})`,
+      ipAddress: req.ip || '127.0.0.1',
+      location: 'Policy Simulation Engine',
+      device: req.headers['user-agent'] || 'AuraPredict Web Suite',
+      status: 'success'
+    });
+
+    res.json({ success: true, savedRecord: record });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to persist policy simulation.' });
+  }
+});
+
+app.get('/api/routes', (req, res) => {
+  const currentUser = getAuthenticatedUser(req);
+  res.json({ routes: db.getSavedRoutes(currentUser.id) });
+});
+
+app.post('/api/routes/save', async (req, res) => {
+  try {
+    const currentUser = getAuthenticatedUser(req);
+    const { name, origin, destination, distanceKm, exposureReductionPct, waypoints } = req.body;
+    
+    const record = await db.saveRoute({
+      userId: currentUser.id,
+      name: name || 'Optimized Clean Route',
+      origin: origin || 'Point A',
+      destination: destination || 'Point B',
+      distanceKm: distanceKm || 8.4,
+      exposureReductionPct: exposureReductionPct || 35,
+      waypoints: waypoints || []
+    });
+
+    await db.addAuditLog({
+      event: `Clean Air Route Saved: ${record.name} (${record.exposureReductionPct}% exposure reduction)`,
+      ipAddress: req.ip || '127.0.0.1',
+      location: 'GIS Route Engine',
+      device: req.headers['user-agent'] || 'AuraPredict Navigation Suite',
+      status: 'success'
+    });
+
+    res.json({ success: true, savedRoute: record });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to persist clean route.' });
+  }
 });
 
 
@@ -376,8 +572,15 @@ You MUST return a JSON object with this EXACT structure:
     }
   });
 
-  const parsedJson = cleanAndParseJSON(geminiResult.text, fallbackPolicy);
-  res.json(parsedJson);
+  const parsedJson = cleanAndParseJSON<any>(geminiResult.text, fallbackPolicy);
+  const mergedPolicy = {
+    ...fallbackPolicy,
+    ...(typeof parsedJson === 'object' && parsedJson !== null ? parsedJson : {}),
+    scenarioName: parsedJson?.scenarioName || scenarioTitle || fallbackPolicy.scenarioName,
+    projectedAQIReductionPercent: Number(parsedJson?.projectedAQIReductionPercent) || fallbackPolicy.projectedAQIReductionPercent,
+    newAvgAQI: Number(parsedJson?.newAvgAQI) || fallbackPolicy.newAvgAQI
+  };
+  res.json(mergedPolicy);
 });
 
 // 3. AI Health Assistant & Personal Exposure Advisor
@@ -1005,7 +1208,7 @@ app.post('/api/gemini/fast-analyze', async (req, res) => {
 // VITE MIDDLEWARE / PRODUCTION STATIC SERVER
 // ==========================================
 
-async function startServer() {
+export async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -1020,9 +1223,12 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`[AuraPredict AI] Enterprise Server active at http://0.0.0.0:${PORT}`);
   });
+  return server;
 }
 
-startServer();
+if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
+  startServer();
+}

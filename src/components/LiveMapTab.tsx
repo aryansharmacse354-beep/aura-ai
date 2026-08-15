@@ -269,7 +269,6 @@ export const LiveMapTab: React.FC<LiveMapTabProps> = ({
   // Aspect Ratio selection state
   const [aspectRatio, setAspectRatio] = useState<MapAspectRatio>('fill');
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showStationInspector, setShowStationInspector] = useState(true);
 
   const [activeLayers, setActiveLayers] = useState({
     heatmap: true,
@@ -311,7 +310,7 @@ export const LiveMapTab: React.FC<LiveMapTabProps> = ({
       }
     }, 200);
     return () => clearTimeout(timer);
-  }, [aspectRatio, isFullscreen, showStationInspector]);
+  }, [aspectRatio, isFullscreen]);
 
   // Handle Base Tile Layer switching when viewMode changes
   useEffect(() => {
@@ -871,20 +870,6 @@ export const LiveMapTab: React.FC<LiveMapTabProps> = ({
             </span>
           </button>
 
-          {/* Station Inspector Toggle */}
-          <button
-            onClick={() => setShowStationInspector(!showStationInspector)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all flex items-center space-x-1.5 ${
-              showStationInspector 
-                ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' 
-                : 'bg-slate-950 text-slate-400 border-slate-800'
-            }`}
-            title="Toggle GNN Telemetry Inspector Panel"
-          >
-            <MapPin className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="hidden sm:inline">Inspector</span>
-          </button>
-
           {/* Center GPS / City Shortcuts */}
           <button
             onClick={centerOnCity}
@@ -1254,86 +1239,6 @@ export const LiveMapTab: React.FC<LiveMapTabProps> = ({
 
           </div>
         </div>
-
-        {/* Right Side GNN Station Inspector Drawer */}
-        {showStationInspector && (
-          <div className="w-full lg:w-80 bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 flex flex-col justify-between overflow-y-auto flex-shrink-0 shadow-xl">
-            <div>
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                <div className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4 text-emerald-400" />
-                  <h3 className="font-bold text-sm text-slate-100">GNN Station Inspector</h3>
-                </div>
-                <span className="text-[10px] bg-slate-800 text-slate-300 font-mono px-2 py-0.5 rounded">
-                  Node ID: {selectedGNNNode?.id}
-                </span>
-              </div>
-
-              {selectedGNNNode ? (
-                <div className="space-y-3 mt-3 text-xs">
-                  <div>
-                    <h4 className="font-bold text-slate-200 text-sm">{selectedGNNNode.name}</h4>
-                    <p className="text-slate-400 text-[11px]">Type: <span className="capitalize font-mono text-slate-300">{selectedGNNNode.type.replace('_', ' ')}</span></p>
-                  </div>
-
-                  <div className="bg-slate-950 p-3 rounded-xl border border-slate-800/80 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Current Node AQI:</span>
-                      <span className={`font-mono font-bold text-sm ${
-                        selectedGNNNode.aqi > 300 ? 'text-red-400' : selectedGNNNode.aqi > 200 ? 'text-orange-400' : 'text-emerald-400'
-                      }`}>
-                        {selectedGNNNode.aqi}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Vector Drift Velocity:</span>
-                      <span className="text-slate-200 font-mono">{selectedGNNNode.vectorDriftSpeed} km/h</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Wind Direction:</span>
-                      <span className="text-slate-200 font-mono">{selectedGNNNode.vectorDirectionDeg}° NW</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-400">Telemetry Status:</span>
-                      <span className="text-emerald-400 font-mono font-semibold">Active Realtime</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-slate-400 font-semibold block mb-1">Graph Network Interconnections:</label>
-                    <div className="flex flex-wrap gap-1">
-                      {selectedGNNNode.connectedNodeIds.map((nodeId) => (
-                        <span key={nodeId} className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded font-mono text-[10px]">
-                          → {nodeId}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-2.5 text-[11px] text-emerald-300">
-                    <p className="font-semibold mb-0.5">GNN Drift Simulation:</p>
-                    <p className="text-slate-300">
-                      Physical particulate propagation models show air mass moving toward neighboring residential sectors over the next 3.5 hours.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs text-slate-400 mt-4">Click any station pin on the map to inspect telemetry details.</p>
-              )}
-            </div>
-
-            <div className="pt-2 border-t border-slate-800 text-[10px] text-slate-400 space-y-1">
-              <div className="flex justify-between">
-                <span>Map Render Engine:</span>
-                <span className="font-mono text-slate-300">Leaflet GL + Canvas</span>
-              </div>
-              <div className="flex justify-between">
-                <span>GNN Interpolation:</span>
-                <span className="font-mono text-slate-300">IDW Kriging Mesh</span>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
