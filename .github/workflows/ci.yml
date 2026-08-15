@@ -26,12 +26,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install Dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm install --no-audit --no-fund
 
       - name: Run Static Code Analysis & Type Check
         run: npm run lint
