@@ -374,7 +374,7 @@ export const UserProfileTab: React.FC<UserProfileTabProps> = ({
                   max="300"
                   step="10"
                   value={alertThreshold}
-                  onChange={(e) => setAlertThreshold(parseInt(e.target.value))}
+                  onChange={(e) => setAlertThreshold(parseInt(e.target.value) || 150)}
                   className="w-full accent-emerald-500 cursor-pointer"
                 />
                 <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 gap-1">

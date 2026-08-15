@@ -1453,3 +1453,94 @@ export const INITIAL_OFFLINE_REGIONS: OfflineMapRegion[] = [
     isDownloaded: false
   }
 ];
+
+export const INITIAL_PINNED_COMMUNITY_NOTES = [
+  {
+    id: 'note_pin_01',
+    title: 'Severe Diesel Freight Idle Zone at Anand Vihar Terminal',
+    category: 'Incident' as const,
+    severity: 'Critical' as const,
+    lat: 28.6469,
+    lng: 77.3160,
+    locationName: 'Anand Vihar ISBT & Freight Corridor',
+    authorRole: 'field_officer' as const,
+    authorName: 'Inspector R. Sharma',
+    timestamp: '15 mins ago',
+    description: 'Over 45 heavy interstate trucks idling with diesel particulate filters bypassed. Micro-sensor registering local PM2.5 > 420 µg/m³.',
+    upvotes: 28,
+    hasUpvoted: false,
+    status: 'Under Investigation' as const,
+    verifiedByOfficial: true,
+    comments: [
+      {
+        id: 'c1',
+        authorName: 'Marcus Vance (City Planner)',
+        authorRole: 'planner' as const,
+        text: 'Enforcement drone squad dispatched to issue automated challans.',
+        timestamp: '10 mins ago'
+      },
+      {
+        id: 'c2',
+        authorName: 'Dr. Sarah Lin (Citizen)',
+        authorRole: 'citizen' as const,
+        text: 'Re-routed my morning commute via the Clean-Air Navigator to bypass this corridor.',
+        timestamp: '5 mins ago'
+      }
+    ],
+    tags: ['Diesel', 'Freight', 'PM2.5 Spikes', 'Traffic']
+  },
+  {
+    id: 'note_pin_02',
+    title: 'Air Quality Sensor #09 Optical Humidity Saturated',
+    category: 'Sensor Calibration' as const,
+    severity: 'Moderate' as const,
+    lat: 28.6139,
+    lng: 77.2090,
+    locationName: 'Central Secretariat Sensor Pod',
+    authorRole: 'analyst' as const,
+    authorName: 'AeroMet Metrology Team',
+    timestamp: '1 hour ago',
+    description: 'RH exceeded 88%, activating kappa-Köhler hygroscopic growth correction f(RH) = 1.34 to prevent 35% overestimation in optical scattering.',
+    upvotes: 14,
+    hasUpvoted: true,
+    status: 'Mitigated' as const,
+    verifiedByOfficial: true,
+    comments: [
+      {
+        id: 'c3',
+        authorName: 'Dr. K. Patel (Environmental Analyst)',
+        authorRole: 'analyst' as const,
+        text: 'Automated PINN loss constraint updated with ERA5 relative humidity reanalysis.',
+        timestamp: '40 mins ago'
+      }
+    ],
+    tags: ['Sensor Drift', 'RH Swelling', 'Köhler Theory']
+  },
+  {
+    id: 'note_pin_03',
+    title: 'Clean-Air Public Respite Shelter & Filter Station Active',
+    category: 'Clean Shelter' as const,
+    severity: 'Low' as const,
+    lat: 28.6304,
+    lng: 77.2177,
+    locationName: 'Connaught Place Civic Center',
+    authorRole: 'citizen' as const,
+    authorName: 'Community Clean Air Volunteer',
+    timestamp: '2 hours ago',
+    description: 'Indoor community refuge open with triple-stage HEPA filtration (indoor AQI 24 vs ambient 285). Free N95 mask distribution available.',
+    upvotes: 42,
+    hasUpvoted: true,
+    status: 'Resolved' as const,
+    verifiedByOfficial: true,
+    comments: [
+      {
+        id: 'c4',
+        authorName: 'Senior Citizen Group',
+        authorRole: 'citizen' as const,
+        text: 'Excellent refuge for asthmatic and elderly residents during morning peak inversion hours.',
+        timestamp: '1 hour ago'
+      }
+    ],
+    tags: ['HEPA Shelter', 'N95 Masks', 'Public Health']
+  }
+];

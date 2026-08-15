@@ -1,6 +1,6 @@
 {
   "name": "AuraPredict AI",
   "description": "Generative Spatio-Temporal Air Quality Forecasting & Proactive Mitigation Platform with real-time GPS tracking, offline map support, clean-path navigation, GenAI policy simulation, and secure profile management.",
-  "requestFramePermissions": ["geolocation"],
+  "requestFramePermissions": ["geolocation", "microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

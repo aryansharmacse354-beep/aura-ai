@@ -185,3 +185,31 @@ export interface AIChatMessage {
   timestamp: string;
   groundingSources?: { title: string; url: string }[];
 }
+
+export type ThemeMode = 'slate' | 'light';
+
+export interface PinnedCommunityNote {
+  id: string;
+  title: string;
+  category: 'Incident' | 'Sensor Calibration' | 'Health Hazard' | 'Policy Enforcement' | 'Clean Shelter' | 'Community Report';
+  severity: 'Low' | 'Moderate' | 'High' | 'Critical';
+  lat: number;
+  lng: number;
+  locationName: string;
+  authorRole: UserRole;
+  authorName: string;
+  timestamp: string;
+  description: string;
+  upvotes: number;
+  hasUpvoted?: boolean;
+  status: 'Open' | 'Under Investigation' | 'Mitigated' | 'Resolved';
+  verifiedByOfficial: boolean;
+  comments: {
+    id: string;
+    authorName: string;
+    authorRole: UserRole;
+    text: string;
+    timestamp: string;
+  }[];
+  tags?: string[];
+}

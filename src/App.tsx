@@ -11,6 +11,14 @@ import { HealthAdvisorTab } from './components/HealthAdvisorTab';
 import { OfflineManagerTab } from './components/OfflineManagerTab';
 import { UserProfileTab } from './components/UserProfileTab';
 import { RoleCustomizedFunctionsModal } from './components/RoleCustomizedFunctionsModal';
+import { MultiUserActionSuiteTab } from './components/MultiUserActionSuiteTab';
+import { CleanAirRouteNavigatorTab } from './components/CleanAirRouteNavigatorTab';
+import { PlumeDispersionLabTab } from './components/PlumeDispersionLabTab';
+import { AQIHistoricalDataTab } from './components/AQIHistoricalDataTab';
+import { AtmosphericMLLabTab } from './components/AtmosphericMLLabTab';
+import { GeminiChatbotTab } from './components/GeminiChatbotTab';
+import { AtmosphericImageStudioTab } from './components/AtmosphericImageStudioTab';
+import { AQILogo } from './components/AQILogo';
 
 import { 
   AQIMeasurement, 
@@ -21,7 +29,8 @@ import {
   PolicySimulationResult, 
   SecurityAuditLog, 
   UserProfile, 
-  UserRole 
+  UserRole,
+  ThemeMode 
 } from './types';
 import { CITIES_AQI_DATA, MOCK_72H_FORECAST, INITIAL_USER_PROFILES, INITIAL_SECURITY_LOGS, INITIAL_OFFLINE_REGIONS } from './data/mockData';
 import { gpsTracker } from './services/gpsService';
@@ -31,6 +40,24 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('map');
   const [selectedCityId, setSelectedCityId] = useState('delhi');
   const [isOffline, setIsOffline] = useState(offlineStorage.getForcedOffline());
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    try {
+      const savedTheme = localStorage.getItem('aurapredict_theme') as ThemeMode;
+      return savedTheme === 'light' ? 'light' : 'slate';
+    } catch {
+      return 'slate';
+    }
+  });
+
+  const handleToggleTheme = () => {
+    const nextTheme: ThemeMode = theme === 'slate' ? 'light' : 'slate';
+    setTheme(nextTheme);
+    try {
+      localStorage.setItem('aurapredict_theme', nextTheme);
+    } catch (e) {
+      console.warn('Could not persist theme', e);
+    }
+  };
 
   const [user, setUser] = useState<UserProfile>(INITIAL_USER_PROFILES[0]);
   const [auditLogs, setAuditLogs] = useState<SecurityAuditLog[]>(INITIAL_SECURITY_LOGS);
@@ -207,7 +234,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-slate-950">
+    <div className={`h-screen w-screen overflow-hidden flex flex-col ${theme === 'light' ? 'light-mode bg-slate-100 text-slate-900' : 'bg-slate-950 text-slate-100'} font-sans selection:bg-emerald-500 selection:text-slate-950 transition-colors duration-200`}>
       {/* Enterprise Top Navigation & Global Header Bar */}
       <HeaderBar
         selectedCity={selectedCityId}
@@ -216,6 +243,8 @@ export default function App() {
         setActiveTab={setActiveTab}
         user={user}
         onOpenRoleModal={() => setShowRoleModal(true)}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
       />
 
       <div className="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden relative">
@@ -240,8 +269,15 @@ export default function App() {
           onRoleChange={handleRoleChange}
         />
 
-        {/* Main Content View Container */}
+        {/* Main Content View Container with Ambient AQI Logo Watermark Backdrop */}
         <main className="flex-1 h-full min-w-0 overflow-hidden p-3 md:p-5 flex flex-col relative">
+          {/* Subtle Ambient AQI Logo Background Watermark */}
+          <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center overflow-hidden">
+            <div className="w-[600px] h-[300px] md:w-[800px] md:h-[400px] opacity-[0.03] dark:opacity-[0.045] transform -rotate-6 transition-all duration-700">
+              <AQILogo variant="watermark" className="w-full h-full" />
+            </div>
+          </div>
+
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -249,8 +285,48 @@ export default function App() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -6, scale: 0.995 }}
               transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
-              className="w-full h-full min-h-0 flex-1 flex flex-col overflow-hidden"
+              className="w-full h-full min-h-0 flex-1 flex flex-col overflow-hidden relative z-10"
             >
+              {activeTab === 'gemini_chat' && (
+                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                  <GeminiChatbotTab
+                    currentCityData={currentCityData}
+                  />
+                </div>
+              )}
+
+              {activeTab === 'image_studio' && (
+                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                  <AtmosphericImageStudioTab
+                    currentCityData={currentCityData}
+                  />
+                </div>
+              )}
+
+              {activeTab === 'route_nav' && (
+                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                  <CleanAirRouteNavigatorTab
+                    currentCityData={currentCityData}
+                  />
+                </div>
+              )}
+
+              {activeTab === 'plume_lab' && (
+                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                  <PlumeDispersionLabTab
+                    currentCityData={currentCityData}
+                  />
+                </div>
+              )}
+
+              {activeTab === 'multi_user' && (
+                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                  <MultiUserActionSuiteTab
+                    currentCityData={currentCityData}
+                  />
+                </div>
+              )}
+
               {activeTab === 'map' && (
                 <LiveMapTab
                   currentCityData={currentCityData}
@@ -261,6 +337,14 @@ export default function App() {
                 />
               )}
 
+              {activeTab === 'ml_lab' && (
+                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                  <AtmosphericMLLabTab
+                    currentCityData={currentCityData}
+                  />
+                </div>
+              )}
+
               {activeTab === 'forecast' && (
                 <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
                   <ForecastTab
@@ -269,6 +353,14 @@ export default function App() {
                     onTriggerAIPrediction={handleTriggerAIPrediction}
                     aiReportMarkdown={aiReportMarkdown}
                     isLoadingAI={isLoadingForecastAI}
+                  />
+                </div>
+              )}
+
+              {activeTab === 'historical' && (
+                <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
+                  <AQIHistoricalDataTab
+                    currentCityData={currentCityData}
                   />
                 </div>
               )}
