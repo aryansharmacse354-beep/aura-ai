@@ -17,7 +17,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "seed": "tsx scripts/seed.ts",
-    "prepare": "husky install",
+    "prepare": "husky install || true",
     "check": "npm run lint && npm run test && npm run build"
   },
   "lint-staged": {
