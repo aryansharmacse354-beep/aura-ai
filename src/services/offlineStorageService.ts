@@ -9,27 +9,72 @@ const STORAGE_KEYS = {
 };
 
 export class OfflineStorageService {
+  private memoryCache: Map<string, string> = new Map();
+
+  private safeGetItem(key: string): string | null {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        return localStorage.getItem(key);
+      }
+    } catch {
+      // Fallback to memory cache
+    }
+    return this.memoryCache.get(key) || null;
+  }
+
+  private safeSetItem(key: string, value: string): void {
+    this.memoryCache.set(key, value);
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem(key, value);
+      }
+    } catch {
+      // Memory cache is already updated
+    }
+  }
+
+  private safeRemoveItem(key: string): void {
+    this.memoryCache.delete(key);
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.removeItem(key);
+      }
+    } catch {
+      // Memory cache is already cleared
+    }
+  }
+
   public isOnline(): boolean {
-    const forcedOffline = localStorage.getItem(STORAGE_KEYS.OFFLINE_MODE_FORCED) === 'true';
+    const forcedOffline = this.safeGetItem(STORAGE_KEYS.OFFLINE_MODE_FORCED) === 'true';
     if (forcedOffline) return false;
-    return navigator.onLine;
+    return typeof navigator !== 'undefined' ? navigator.onLine : true;
   }
 
   public setForcedOffline(forced: boolean) {
-    localStorage.setItem(STORAGE_KEYS.OFFLINE_MODE_FORCED, forced ? 'true' : 'false');
+    this.safeSetItem(STORAGE_KEYS.OFFLINE_MODE_FORCED, forced ? 'true' : 'false');
   }
 
   public getForcedOffline(): boolean {
-    return localStorage.getItem(STORAGE_KEYS.OFFLINE_MODE_FORCED) === 'true';
+    return this.safeGetItem(STORAGE_KEYS.OFFLINE_MODE_FORCED) === 'true';
   }
 
   public saveOfflineRegions(regions: OfflineMapRegion[]) {
-    localStorage.setItem(STORAGE_KEYS.OFFLINE_REGIONS, JSON.stringify(regions));
+    try {
+      this.safeSetItem(STORAGE_KEYS.OFFLINE_REGIONS, JSON.stringify(regions));
+    } catch (e) {
+      console.warn('Failed to stringify offline regions', e);
+    }
   }
 
   public getOfflineRegions(): OfflineMapRegion[] {
-    const data = localStorage.getItem(STORAGE_KEYS.OFFLINE_REGIONS);
-    return data ? JSON.parse(data) : [];
+    const data = this.safeGetItem(STORAGE_KEYS.OFFLINE_REGIONS);
+    if (!data) return [];
+    try {
+      const parsed = JSON.parse(data);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
 
   public cacheAQISnapshot(key: string, data: any) {
@@ -38,27 +83,47 @@ export class OfflineStorageService {
       timestamp: new Date().toISOString(),
       payload: data
     };
-    localStorage.setItem(STORAGE_KEYS.CACHED_AQI_SNAPSHOTS, JSON.stringify(existing));
+    try {
+      this.safeSetItem(STORAGE_KEYS.CACHED_AQI_SNAPSHOTS, JSON.stringify(existing));
+    } catch (e) {
+      console.warn('Failed to cache AQI snapshot', e);
+    }
   }
 
   public getAQISnapshots(): Record<string, { timestamp: string; payload: any }> {
-    const data = localStorage.getItem(STORAGE_KEYS.CACHED_AQI_SNAPSHOTS);
-    return data ? JSON.parse(data) : {};
+    const data = this.safeGetItem(STORAGE_KEYS.CACHED_AQI_SNAPSHOTS);
+    if (!data) return {};
+    try {
+      const parsed = JSON.parse(data);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+      return {};
+    }
   }
 
   public queuePendingOfflineLog(action: string, payload: any) {
     const queue = this.getPendingOfflineLogs();
     queue.push({ id: `sync_${Date.now()}`, action, payload, timestamp: new Date().toISOString() });
-    localStorage.setItem(STORAGE_KEYS.PENDING_OFFLINE_LOGS, JSON.stringify(queue));
+    try {
+      this.safeSetItem(STORAGE_KEYS.PENDING_OFFLINE_LOGS, JSON.stringify(queue));
+    } catch (e) {
+      console.warn('Failed to queue offline log', e);
+    }
   }
 
   public getPendingOfflineLogs(): { id: string; action: string; payload: any; timestamp: string }[] {
-    const data = localStorage.getItem(STORAGE_KEYS.PENDING_OFFLINE_LOGS);
-    return data ? JSON.parse(data) : [];
+    const data = this.safeGetItem(STORAGE_KEYS.PENDING_OFFLINE_LOGS);
+    if (!data) return [];
+    try {
+      const parsed = JSON.parse(data);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
   }
 
   public clearPendingOfflineLogs() {
-    localStorage.removeItem(STORAGE_KEYS.PENDING_OFFLINE_LOGS);
+    this.safeRemoveItem(STORAGE_KEYS.PENDING_OFFLINE_LOGS);
   }
 }
 

@@ -29,7 +29,8 @@ import {
   HardDriveDownload,
   LayoutGrid,
   Image as ImageIcon,
-  Ratio
+  Ratio,
+  Download
 } from 'lucide-react';
 import { CITIES_AQI_DATA } from '../data/mockData';
 import { UserProfile, ThemeMode } from '../types';
@@ -42,6 +43,9 @@ interface HeaderBarProps {
   setActiveTab: (tabId: string) => void;
   user: UserProfile;
   onOpenRoleModal?: () => void;
+  onOpenInstallModal?: () => void;
+  isInstalled?: boolean;
+  hasInstallPrompt?: boolean;
   theme?: ThemeMode;
   onToggleTheme?: () => void;
 }
@@ -118,6 +122,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   setActiveTab,
   user,
   onOpenRoleModal,
+  onOpenInstallModal,
+  isInstalled = false,
+  hasInstallPrompt = false,
   theme = 'slate',
   onToggleTheme
 }) => {
@@ -503,6 +510,27 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           >
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
             <span className="hidden lg:inline">Role Deck</span>
+          </button>
+        )}
+
+        {/* Install PWA / Native App Button */}
+        {onOpenInstallModal && (
+          <button
+            onClick={onOpenInstallModal}
+            className={`px-2.5 py-1.5 rounded-xl border text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
+              hasInstallPrompt
+                ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border-emerald-500/50 shadow-sm animate-pulse'
+                : isInstalled
+                ? 'bg-slate-900 text-emerald-400 border-slate-800'
+                : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800'
+            }`}
+            title="Install AuraPredict AI App (PWA, Desktop, Mobile & Docker)"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden sm:inline">{isInstalled ? 'App Ready' : 'Install App'}</span>
+            {hasInstallPrompt && (
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            )}
           </button>
         )}
 

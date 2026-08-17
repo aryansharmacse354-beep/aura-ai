@@ -9,11 +9,16 @@ import dotenv from 'dotenv';
 import { CITIES_AQI_DATA, MOCK_72H_FORECAST } from './src/data/mockData';
 import { UserProfile, SecurityAuditLog } from './src/types';
 import { db, hashPassword, verifyPassword } from './server/db';
+import { docsRouter } from './server/routes/docsRoutes';
+import { requestLogger } from './server/middlewares/logger';
 
 dotenv.config();
 
 export const app = express();
 const PORT = 3000;
+
+// Request Logging Middleware
+app.use(requestLogger);
 
 // Security Middleware (Helmet + CORS)
 app.use(helmet({
@@ -28,6 +33,9 @@ app.use(cors({
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Mount OpenAPI 3.0 Documentation routes
+app.use('/api', docsRouter);
 
 // ==========================================
 // RATE LIMITING & SECURITY SAFEGUARDS
@@ -1202,6 +1210,26 @@ app.post('/api/gemini/fast-analyze', async (req, res) => {
       isFallback: true
     });
   }
+});
+
+// ==========================================
+// GLOBAL ERROR HANDLER MIDDLEWARE
+// ==========================================
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || 'Internal Server Error';
+  console.error(`[AuraPredict Server Error] ${req.method} ${req.originalUrl}:`, err);
+  
+  if (res.headersSent) {
+    return next(err);
+  }
+  
+  res.status(status).json({
+    error: message,
+    status,
+    path: req.originalUrl,
+    timestamp: new Date().toISOString()
+  });
 });
 
 // ==========================================

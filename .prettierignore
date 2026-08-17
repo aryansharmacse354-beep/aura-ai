@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+coverage
+*.lock
+.bun*
+.vscode
+.env
+.env.local

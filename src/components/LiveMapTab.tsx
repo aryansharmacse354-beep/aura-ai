@@ -312,6 +312,28 @@ export const LiveMapTab: React.FC<LiveMapTabProps> = ({
     return () => clearTimeout(timer);
   }, [aspectRatio, isFullscreen]);
 
+  // Map Lifecycle & Unmount Cleanup
+  useEffect(() => {
+    return () => {
+      if (mapInstanceRef.current) {
+        try {
+          mapInstanceRef.current.remove();
+        } catch (e) {
+          console.warn('Error removing primary map instance', e);
+        }
+        mapInstanceRef.current = null;
+      }
+      if (secondaryMapInstanceRef.current) {
+        try {
+          secondaryMapInstanceRef.current.remove();
+        } catch (e) {
+          console.warn('Error removing secondary map instance', e);
+        }
+        secondaryMapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
   // Handle Base Tile Layer switching when viewMode changes
   useEffect(() => {
     const map = mapInstanceRef.current;

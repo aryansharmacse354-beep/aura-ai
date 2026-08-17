@@ -39,7 +39,8 @@ import {
   Filter,
   Search,
   CheckCircle,
-  Tag
+  Tag,
+  PieChart as PieChartIcon
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -555,7 +556,7 @@ export const MultiUserActionSuiteTab: React.FC<MultiUserActionSuiteTabProps> = (
 
             <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
               <h4 className="font-extrabold text-xs text-slate-100 flex items-center space-x-1.5 border-b border-slate-800 pb-3">
-                <PieChart className="w-4 h-4 text-emerald-400" />
+                <PieChartIcon className="w-4 h-4 text-emerald-400" />
                 <span>Urban PM2.5 Speciation Attribution</span>
               </h4>
               <div className="h-48">
@@ -1083,7 +1084,9 @@ export const MultiUserActionSuiteTab: React.FC<MultiUserActionSuiteTabProps> = (
                       <div className="flex items-center justify-between text-xs text-slate-400">
                         <div className="flex items-center space-x-1.5">
                           {note.verifiedByOfficial && (
-                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" title="Verified by Air Quality Inspector" />
+                            <span title="Verified by Air Quality Inspector">
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                            </span>
                           )}
                           <span className="font-medium text-slate-300 truncate max-w-[140px]">{note.authorName}</span>
                         </div>

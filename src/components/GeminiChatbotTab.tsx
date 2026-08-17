@@ -88,15 +88,17 @@ export const GeminiChatbotTab: React.FC<GeminiChatbotTabProps> = ({ currentCityD
     }
   }, [enableHighThinking, lowLatency, selectedRole]);
 
+  const pm25Value = currentCityData.pollutants?.find(p => p.name === 'PM2.5')?.value || Math.round(currentCityData.aqi * 0.45);
+
   // Quick Prompt Suggestions
   const rolePrompts = {
     chemist: [
       `Derive the photochemical equilibrium between O3, NO, and NO2 under intense solar actinic flux for ${currentCityData.cityName}.`,
-      `Explain the VOC-limited vs NOx-limited ozone sensitivity regime given PM2.5 of ${currentCityData.pm25} µg/m³.`,
+      `Explain the VOC-limited vs NOx-limited ozone sensitivity regime given PM2.5 of ${pm25Value} µg/m³.`,
       `What chemical oxidation pathways convert SO2 to secondary ammonium sulfate aerosols in winter smog?`
     ],
     epidemiologist: [
-      `What is the alveolar deposition fraction of PM2.5 at ${currentCityData.pm25} µg/m³ during moderate aerobic exertion?`,
+      `What is the alveolar deposition fraction of PM2.5 at ${pm25Value} µg/m³ during moderate aerobic exertion?`,
       `Compare the fractional filtration efficiency of N95 vs standard surgical masks for wildfire smoke micro-particles.`,
       `Provide clinical guidance for asthmatic patients in ${currentCityData.cityName} with current AQI ${currentCityData.aqi}.`
     ],

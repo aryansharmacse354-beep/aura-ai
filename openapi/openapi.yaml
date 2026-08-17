@@ -1,0 +1,126 @@
+openapi: 3.0.3
+info:
+  title: AuraPredict AI - OpenAPI
+  version: 1.0.0
+  description: OpenAPI skeleton for key AuraPredict AI endpoints (auth, forecasting, chat).
+servers:
+  - url: http://localhost:3000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required: [email, password]
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          type: object
+    ForecastRequest:
+      type: object
+      properties:
+        cityName:
+          type: string
+        currentAQI:
+          type: number
+        pollutants:
+          type: array
+          items:
+            type: object
+    ForecastResponse:
+      type: object
+      properties:
+        cityName:
+          type: string
+        summaryMarkdown:
+          type: string
+        forecastPoints:
+          type: array
+        modelUsed:
+          type: string
+        isFallback:
+          type: boolean
+    ChatRequest:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              role:
+                type: string
+              content:
+                type: string
+          minItems: 1
+    ChatResponse:
+      type: object
+      properties:
+        reply:
+          type: string
+        modelUsed:
+          type: string
+        isFallback:
+          type: boolean
+paths:
+  /api/auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+  /api/predict/forecast:
+    post:
+      summary: Generate 72-hour forecast
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForecastRequest'
+      responses:
+        '200':
+          description: forecast result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForecastResponse'
+  /api/gemini/chat:
+    post:
+      summary: Multi-turn Gemini chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: chat reply
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+security:
+  - bearerAuth: []

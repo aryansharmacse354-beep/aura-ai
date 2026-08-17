@@ -2,11 +2,21 @@
 
 [![AuraPredict CI Quality Gate](https://github.com/aryansharma/aurapredict-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/aryansharma/aurapredict-ai/actions/workflows/ci.yml)
 [![CodeQL Security Scan](https://github.com/aryansharma/aurapredict-ai/actions/workflows/codeql.yml/badge.svg)](https://github.com/aryansharma/aurapredict-ai/actions/workflows/codeql.yml)
+[![OpenAPI 3.0.3](https://img.shields.io/badge/OpenAPI-3.0.3-6BA539.svg)](/api/docs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Node Version](https://img.shields.io/badge/Node.js-%3E%3D20.0.0-brightgreen.svg)](https://nodejs.org)
 [![Docker Support](https://img.shields.io/badge/Docker-Multi--Stage-blue)](Dockerfile)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6.svg)](https://www.typescriptlang.org/)
 
 AuraPredict AI is a full-stack, enterprise-grade generative spatio-temporal air quality forecasting, atmospheric physics modeling, multi-turn AI reasoning, and proactive clean-air mitigation system. It combines physics-informed machine learning, real-time GPS telemetry, offline edge GIS mapping, exposure-minimizing route navigation, multi-agent climate consensus swarms, Gemini multi-turn reasoning with High Thinking mode, speech-to-text audio transcription, synthetic satellite image diffusion with 8 aspect ratios, and GenAI policy simulation.
+
+---
+
+## 📚 Architecture & Documentation
+- **[Architecture & ML Pipeline](ARCHITECTURE.md)**: Deep dive into the Physics-Informed Neural Network (PINN), Graph Neural Network (GNN), and edge-resilient architecture.
+- **[REST & OpenAPI Reference](API.md)**: Complete endpoint contracts, payload schemas, and authentication documentation. Interactive docs available at `/api/docs`.
+- **[Engineering Roadmap](ROADMAP.md)**: Strategic milestones for satellite telemetry ingestion, WebGPU on-device inference, and TimescaleDB scaling.
+- **[Changelog](CHANGELOG.md)**: Release log detailing semantic versions and feature progressions.
 
 ---
 

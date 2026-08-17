@@ -5,6 +5,8 @@ import { HeaderBar } from './components/HeaderBar';
 import { AqiNotificationToast } from './components/AqiNotificationToast';
 import { AQILogo } from './components/AQILogo';
 import { TabLoadingSkeleton } from './components/TabLoadingSkeleton';
+import { AppInstallModal } from './components/AppInstallModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Code Splitting / Lazy Loaded Modules to improve performance and initial bundle sizes
 const LiveMapTab = lazy(() => import('./components/LiveMapTab').then(m => ({ default: m.LiveMapTab })));
@@ -66,6 +68,49 @@ export default function App() {
   const [auditLogs, setAuditLogs] = useState<SecurityAuditLog[]>(INITIAL_SECURITY_LOGS);
   const [offlineRegions, setOfflineRegions] = useState<OfflineMapRegion[]>(INITIAL_OFFLINE_REGIONS);
   const [showRoleModal, setShowRoleModal] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any | null>(null);
+  const [isInstalled, setIsInstalled] = useState<boolean>(() => {
+    try {
+      return window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+    } catch {
+      return false;
+    }
+  });
+
+  // Capture native browser PWA install prompts
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+      setShowInstallModal(false);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleNativeInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setIsInstalled(true);
+      }
+      setDeferredPrompt(null);
+      setShowInstallModal(false);
+    }
+  };
 
   // Real-time GPS tracking state
   const [gpsPos, setGpsPos] = useState<GPSPosition | null>(null);
@@ -246,6 +291,9 @@ export default function App() {
         setActiveTab={setActiveTab}
         user={user}
         onOpenRoleModal={() => setShowRoleModal(true)}
+        onOpenInstallModal={() => setShowInstallModal(true)}
+        isInstalled={isInstalled}
+        hasInstallPrompt={!!deferredPrompt}
         theme={theme}
         onToggleTheme={handleToggleTheme}
       />
@@ -270,6 +318,9 @@ export default function App() {
           setSelectedCity={setSelectedCityId}
           user={user}
           onRoleChange={handleRoleChange}
+          onOpenInstallModal={() => setShowInstallModal(true)}
+          isInstalled={isInstalled}
+          hasInstallPrompt={!!deferredPrompt}
         />
 
         {/* Main Content View Container with Ambient AQI Logo Watermark Backdrop */}
@@ -290,8 +341,12 @@ export default function App() {
               transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
               className="w-full h-full min-h-0 flex-1 flex flex-col overflow-hidden relative z-10"
             >
-              <Suspense fallback={<TabLoadingSkeleton title={activeTab.replace('_', ' ').toUpperCase()} />}>
-                {activeTab === 'gemini_chat' && (
+              <ErrorBoundary 
+                fallbackTitle={`${activeTab.replace('_', ' ').toUpperCase()} Tab Error`} 
+                onReset={() => setActiveTab('map')}
+              >
+                <Suspense fallback={<TabLoadingSkeleton title={activeTab.replace('_', ' ').toUpperCase()} />}>
+                  {activeTab === 'gemini_chat' && (
                   <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
                     <GeminiChatbotTab
                       currentCityData={currentCityData}
@@ -421,7 +476,8 @@ export default function App() {
                     />
                   </div>
                 )}
-              </Suspense>
+                </Suspense>
+              </ErrorBoundary>
             </motion.div>
           </AnimatePresence>
         </main>
@@ -437,6 +493,15 @@ export default function App() {
             />
           </Suspense>
         )}
+
+        {/* PWA & Native App Installation Modal */}
+        <AppInstallModal
+          isOpen={showInstallModal}
+          onClose={() => setShowInstallModal(false)}
+          deferredPrompt={deferredPrompt}
+          onNativeInstall={handleNativeInstall}
+          isInstalled={isInstalled}
+        />
     </div>
   </div>
 );

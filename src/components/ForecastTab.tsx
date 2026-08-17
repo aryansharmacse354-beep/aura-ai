@@ -24,6 +24,7 @@ import {
   RefreshCw, 
   FileText,
   BarChart3,
+  PieChart as PieChartIcon,
   Download,
   CheckCircle2,
   Printer
@@ -400,7 +401,7 @@ Report compiled by AuraPredict AI Physics-Informed LSTM/GNN Engine
           <div>
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="font-bold text-sm text-slate-100 flex items-center space-x-2">
-                <PieChart className="w-4 h-4 text-emerald-400" />
+                <PieChartIcon className="w-4 h-4 text-emerald-400" />
                 <span>Automated Source Attribution</span>
               </h3>
               <span className="text-[10px] bg-slate-800 text-slate-300 font-mono px-2 py-0.5 rounded">GNN Model</span>

@@ -33,7 +33,8 @@ import {
   ChevronDown,
   Bot,
   Image as ImageIcon,
-  Ratio
+  Ratio,
+  Download
 } from 'lucide-react';
 import { UserRole, UserProfile } from '../types';
 import { AQILogo } from './AQILogo';
@@ -49,6 +50,9 @@ interface SidebarProps {
   user: UserProfile;
   onRoleChange?: (role: UserRole) => void;
   onVoiceReportTrigger?: () => void;
+  onOpenInstallModal?: () => void;
+  isInstalled?: boolean;
+  hasInstallPrompt?: boolean;
 }
 
 export interface NavCategory {
@@ -120,7 +124,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setSelectedCity,
   user,
   onRoleChange,
-  onVoiceReportTrigger
+  onVoiceReportTrigger,
+  onOpenInstallModal,
+  isInstalled = false,
+  hasInstallPrompt = false
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -194,58 +201,73 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
 
     setTimeout(() => {
-      setVoiceFeedback(null), 4000;
-    });
+      setVoiceFeedback(null);
+    }, 4000);
   };
 
   // Toggle Voice Recognition
   const toggleVoiceListener = () => {
     if (isListening) {
       if (recognitionRef.current) {
-        recognitionRef.current.stop();
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          console.warn('Failed to stop speech recognition', e);
+        }
       }
       setIsListening(false);
       return;
     }
 
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
+    try {
+      const SpeechRecognition = typeof window !== 'undefined' && ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
 
-      recognition.onstart = () => {
+        recognition.onstart = () => {
+          setIsListening(true);
+          setVoiceFeedback('Listening for voice command... (e.g. "show forecast", "alert status")');
+        };
+
+        recognition.onresult = (event: any) => {
+          const transcript = event?.results?.[0]?.[0]?.transcript || '';
+          if (transcript) {
+            processVoiceCommand(transcript);
+          }
+          setIsListening(false);
+        };
+
+        recognition.onerror = (event: any) => {
+          console.warn('Speech recognition error:', event?.error);
+          setIsListening(false);
+          setVoiceFeedback(`Speech recognition unavailable (${event?.error || 'error'})`);
+          setTimeout(() => setVoiceFeedback(null), 3000);
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognitionRef.current = recognition;
+        recognition.start();
+      } else {
         setIsListening(true);
-        setVoiceFeedback('Listening for voice command... (e.g. "show forecast", "alert status")');
-      };
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        processVoiceCommand(transcript);
-        setIsListening(false);
-      };
-
-      recognition.onerror = (event: any) => {
-        console.warn('Speech recognition error:', event.error);
-        setIsListening(false);
-        setVoiceFeedback(`Speech recognition unavailable (${event.error})`);
-        setTimeout(() => setVoiceFeedback(null), 3000);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current = recognition;
-      recognition.start();
-    } else {
-      setIsListening(true);
-      setVoiceFeedback('Speech API simulated. Triggering voice AQI report...');
+        setVoiceFeedback('Speech API simulated. Triggering voice AQI report...');
+        setTimeout(() => {
+          processVoiceCommand('alert status');
+          setIsListening(false);
+        }, 1500);
+      }
+    } catch (err) {
+      console.warn('Speech recognition start failed:', err);
+      setIsListening(false);
+      setVoiceFeedback('Speech API unavailable. Triggering voice AQI report...');
       setTimeout(() => {
         processVoiceCommand('alert status');
-        setIsListening(false);
-      }, 1500);
+      }, 1000);
     }
   };
 
@@ -492,6 +514,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span className="text-[8px] font-mono text-slate-400">{isOffline ? 'Edge' : 'Cloud'}</span>
                 </button>
               </div>
+
+              {/* Install App Button */}
+              {onOpenInstallModal && (
+                <button
+                  onClick={onOpenInstallModal}
+                  className={`w-full p-2 rounded-xl border text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
+                    hasInstallPrompt
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 hover:bg-emerald-500/30'
+                      : isInstalled
+                      ? 'bg-slate-900 text-emerald-400 border-slate-800'
+                      : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800'
+                  }`}
+                  title="Install AuraPredict AI App (PWA, Desktop, Mobile & Docker)"
+                >
+                  <div className="flex items-center space-x-2">
+                    <Download className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>{isInstalled ? 'App Installed' : 'Install App'}</span>
+                  </div>
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">
+                    PWA
+                  </span>
+                </button>
+              )}
 
               {/* Role Switcher */}
               <div className="bg-slate-900 p-1.5 rounded-lg border border-slate-800 text-xs space-y-1">
