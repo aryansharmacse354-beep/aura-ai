@@ -12,12 +12,8 @@ interface AuthContextType {
   closeAuthModal: () => void;
   switchRole: (newRole: UserRole) => void;
   updateUserProfile: (updates: Partial<UserProfile>) => void;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, role?: UserRole) => Promise<boolean>;
-  loginWithBiometrics: (email: string) => Promise<boolean>;
-  loginWithFacialRecognition: (imageBase64: string, email: string) => Promise<boolean>;
-  enrollBiometrics: () => Promise<boolean>;
-  enrollFaceId: (imageBase64: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; user?: UserProfile; error?: string }>;
+  register: (account: { name: string; email: string; password: string; role?: UserRole }) => Promise<{ success: boolean; user?: UserProfile; error?: string }>;
   logout: () => void;
 }
 

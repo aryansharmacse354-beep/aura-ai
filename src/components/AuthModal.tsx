@@ -1,26 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   X, 
-  Fingerprint, 
-  Camera, 
   KeyRound, 
   Lock, 
   UserCheck, 
   ShieldCheck, 
   CheckCircle2, 
   AlertCircle, 
-  RefreshCw, 
-  Sparkles, 
-  Scan,
-  Smartphone,
-  Eye,
-  ShieldAlert,
   LogIn,
   UserPlus
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { BiometricAuthService } from '../services/biometricAuthService';
-import { apiFetch } from '../services/api';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -32,14 +22,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     user, 
     login, 
     register, 
-    usersList, 
-    loginWithBiometrics, 
-    loginWithFacialRecognition,
-    enrollBiometrics,
-    enrollFaceId
+    usersList
   } = useAuth();
 
-  const [authMode, setAuthMode] = useState<'password' | 'biometric' | 'face_id' | 'register'>('biometric');
+  const [authMode, setAuthMode] = useState<'password' | 'register'>('password');
   const [email, setEmail] = useState(user?.email || 'sarah.lin@aurapredict.org');
   const [password, setPassword] = useState('AuraPredict2026!');
   const [name, setName] = useState('');
@@ -49,521 +35,262 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     text: ''
   });
 
-  // Biometric state
-  const [biometricAvailable, setBiometricAvailable] = useState<boolean>(true);
-  const [isBiometricScanning, setIsBiometricScanning] = useState<boolean>(false);
-
-  // Face ID state
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [cameraActive, setCameraActive] = useState<boolean>(false);
-  const [isFaceScanning, setIsFaceScanning] = useState<boolean>(false);
-  const [faceDetectionLogs, setFaceDetectionLogs] = useState<string[]>([]);
-  const [faceConfidence, setFaceConfidence] = useState<number | null>(null);
-
-  useEffect(() => {
-    BiometricAuthService.checkAvailability().then(res => {
-      setBiometricAvailable(res.available);
-    });
-  }, []);
-
-  // Handle webcam stream start/stop for Face ID
-  useEffect(() => {
-    let stream: MediaStream | null = null;
-    if (isOpen && authMode === 'face_id') {
-      navigator.mediaDevices?.getUserMedia({ video: { width: 480, height: 360, facingMode: 'user' } })
-        .then(s => {
-          stream = s;
-          if (videoRef.current) {
-            videoRef.current.srcObject = s;
-            videoRef.current.play();
-          }
-          setCameraActive(true);
-        })
-        .catch(err => {
-          console.warn('Webcam stream note:', err);
-          setCameraActive(false);
-        });
-    }
-
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(t => t.stop());
-      }
-      setCameraActive(false);
-    };
-  }, [isOpen, authMode]);
-
   if (!isOpen) return null;
 
   // 1. Password Login Handler
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatusMessage({ type: 'loading', text: 'Verifying PBKDF2 cryptographic password hash...' });
-    const success = await login(email, password);
-    if (success) {
-      setStatusMessage({ type: 'success', text: 'Authentication successful. Welcome back!' });
+    setStatusMessage({ type: 'loading', text: 'Verifying credentials with PBKDF2 cryptography...' });
+    
+    const res = await login(email, password);
+    if (res.success) {
+      setStatusMessage({ type: 'success', text: `Welcome back, ${res.user?.name || email}!` });
       setTimeout(() => {
         onClose();
       }, 1000);
     } else {
-      setStatusMessage({ type: 'error', text: 'Invalid email or password credentials.' });
+      setStatusMessage({ type: 'error', text: res.error || 'Authentication failed. Please verify credentials.' });
     }
   };
 
-  // 2. New User Registration Handler
+  // 2. Account Registration Handler
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password) {
-      setStatusMessage({ type: 'error', text: 'Please fill in all required fields.' });
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setStatusMessage({ type: 'error', text: 'Please fill in name, email, and password.' });
       return;
     }
-    setStatusMessage({ type: 'loading', text: 'Creating cryptographic account profile...' });
-    const success = await register(name, email, password, role);
-    if (success) {
-      setStatusMessage({ type: 'success', text: 'Account registered successfully!' });
-      setTimeout(() => {
-        onClose();
-      }, 1000);
-    } else {
-      setStatusMessage({ type: 'error', text: 'Registration failed. Email may already be in use.' });
-    }
-  };
 
-  // 3. Android BiometricPrompt / WebAuthn Handler
-  const handleTriggerBiometrics = async () => {
-    setIsBiometricScanning(true);
-    setStatusMessage({ type: 'loading', text: 'Authenticating with Android BiometricPrompt / FIDO2 Key...' });
+    setStatusMessage({ type: 'loading', text: 'Generating encrypted user profile & credentials...' });
+    const res = await register({
+      name,
+      email,
+      password,
+      role
+    });
 
-    const success = await loginWithBiometrics(email);
-    setIsBiometricScanning(false);
-    if (success) {
-      setStatusMessage({ type: 'success', text: 'Biometric hardware verified! Session established.' });
+    if (res.success) {
+      setStatusMessage({ type: 'success', text: `Account created for ${name}! Logged in successfully.` });
       setTimeout(() => {
         onClose();
       }, 1200);
     } else {
-      setStatusMessage({ type: 'error', text: 'Biometric verification failed. Please try again or use password.' });
-    }
-  };
-
-  // 4. OpenCV Agent Facial Recognition Handler
-  const handleCaptureAndScanFace = async () => {
-    setIsFaceScanning(true);
-    setFaceDetectionLogs([
-      '[OpenCV Ingest] Capturing optical video frame...',
-      '[OpenCV Agent] Scanning Haar Cascade facial pyramid...',
-      '[OpenCV Agent] Triangulating 68-point facial landmark mesh...'
-    ]);
-    setStatusMessage({ type: 'loading', text: 'OpenCV Agent analyzing facial geometry and anti-spoofing liveness...' });
-
-    let imageBase64 = '';
-    if (videoRef.current && canvasRef.current && cameraActive) {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      canvas.width = video.videoWidth || 320;
-      canvas.height = video.videoHeight || 240;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        imageBase64 = canvas.toDataURL('image/jpeg', 0.85);
-      }
-    } else {
-      // Simulated optical capture frame
-      imageBase64 = 'data:image/jpeg;base64,' + btoa('AuraPredict_OpenCV_Optical_Frame_' + Date.now());
-    }
-
-    try {
-      const res = await apiFetch('/api/auth/facial/verify', {
-        method: 'POST',
-        body: JSON.stringify({
-          imageBase64,
-          userEmail: email
-        })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setFaceConfidence(data.matchConfidence || 97.8);
-        setFaceDetectionLogs(data.detection?.agentThoughtChain || [
-          '[OpenCV Agent] Liveness verified (Score: 94%)',
-          '[OpenCV Agent] 512-dim embedding cosine similarity: 0.94'
-        ]);
-        setStatusMessage({ type: 'success', text: `Face ID Verified (${data.matchConfidence || 97}% Match). Welcome!` });
-        if (data.user) {
-          // Update auth state
-          login(email, 'AuraPredict2026!');
-        }
-        setTimeout(() => {
-          onClose();
-        }, 1500);
-      } else {
-        const err = await res.json();
-        setStatusMessage({ type: 'error', text: err.error || 'Face recognition could not verify identity.' });
-      }
-    } catch {
-      setStatusMessage({ type: 'error', text: 'Facial identification network error.' });
-    } finally {
-      setIsFaceScanning(false);
+      setStatusMessage({ type: 'error', text: res.error || 'Registration failed.' });
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in">
-      <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-900 shadow-2xl shadow-emerald-500/10 flex flex-col text-slate-100">
         
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800 bg-slate-950/60">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <ShieldCheck className="w-6 h-6" />
+        {/* Header Bar */}
+        <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950/70 px-5 py-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+              <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                AuraPredict Auth Core
-                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium">
-                  FIDO2 / OpenCV
-                </span>
-              </h3>
-              <p className="text-xs text-slate-400">Multi-Modal Cryptographic & Biometric Sign-In</p>
+              <h3 className="text-base font-bold text-white tracking-wide">AuraPredict Authentication</h3>
+              <p className="text-xs text-slate-400 font-mono">PBKDF2 Cryptographic Security</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Modal Modality Tabs */}
-        <div className="grid grid-cols-4 p-2 bg-slate-950/40 border-b border-slate-800 text-xs font-semibold">
+        {/* Auth Mode Toggle Tabs */}
+        <div className="grid grid-cols-2 p-1.5 mx-5 mt-4 bg-slate-950 rounded-xl border border-slate-800 text-xs font-semibold">
           <button
-            onClick={() => setAuthMode('biometric')}
-            className={`py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
-              authMode === 'biometric' 
-                ? 'bg-emerald-500 text-slate-950 shadow-lg font-bold' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            onClick={() => { setAuthMode('password'); setStatusMessage({ type: 'idle', text: '' }); }}
+            className={`flex items-center justify-center gap-1.5 py-2 rounded-lg transition-all ${
+              authMode === 'password'
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Fingerprint className="w-4 h-4" />
-            <span className="hidden sm:inline">Biometric</span>
+            <KeyRound className="h-3.5 w-3.5" />
+            Sign In
           </button>
-
-          <button
-            onClick={() => setAuthMode('face_id')}
-            className={`py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
-              authMode === 'face_id' 
-                ? 'bg-cyan-500 text-slate-950 shadow-lg font-bold' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-            }`}
-          >
-            <Camera className="w-4 h-4" />
-            <span className="hidden sm:inline">Face ID</span>
-          </button>
-
-          <button
-            onClick={() => setAuthMode('password')}
-            className={`py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
-              authMode === 'password' 
-                ? 'bg-indigo-500 text-white shadow-lg font-bold' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-            }`}
-          >
-            <KeyRound className="w-4 h-4" />
-            <span className="hidden sm:inline">Password</span>
-          </button>
-
-          <button
-            onClick={() => setAuthMode('register')}
-            className={`py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
-              authMode === 'register' 
-                ? 'bg-purple-500 text-white shadow-lg font-bold' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-            }`}
-          >
-            <UserPlus className="w-4 h-4" />
-            <span className="hidden sm:inline">Register</span>
-          </button>
-        </div>
-
-        {/* Dynamic Body */}
-        <div className="p-6 overflow-y-auto space-y-5 flex-1">
           
-          {/* Status Message Banner */}
+          <button
+            onClick={() => { setAuthMode('register'); setStatusMessage({ type: 'idle', text: '' }); }}
+            className={`flex items-center justify-center gap-1.5 py-2 rounded-lg transition-all ${
+              authMode === 'register'
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <UserPlus className="h-3.5 w-3.5" />
+            Register
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div className="p-5 flex-1 overflow-y-auto">
+          
+          {/* Status Message Alert */}
           {statusMessage.text && (
-            <div className={`p-3 rounded-2xl flex items-center gap-3 text-xs border ${
-              statusMessage.type === 'loading'
-                ? 'bg-blue-950/40 border-blue-500/30 text-blue-300'
+            <div className={`mb-4 flex items-start gap-2.5 rounded-xl p-3 text-xs ${
+              statusMessage.type === 'error'
+                ? 'bg-rose-500/10 border border-rose-500/30 text-rose-300'
                 : statusMessage.type === 'success'
-                ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300'
-                : 'bg-rose-950/40 border-rose-500/30 text-rose-300'
+                ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
+                : 'bg-blue-500/10 border border-blue-500/30 text-blue-300'
             }`}>
-              {statusMessage.type === 'loading' && <RefreshCw className="w-4 h-4 animate-spin text-blue-400 shrink-0" />}
-              {statusMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
-              {statusMessage.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />}
-              <span className="flex-1 font-medium">{statusMessage.text}</span>
+              {statusMessage.type === 'error' ? (
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-400" />
+              ) : statusMessage.type === 'success' ? (
+                <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-emerald-400" />
+              ) : (
+                <div className="h-4 w-4 shrink-0 rounded-full border-2 border-blue-400 border-t-transparent animate-spin mt-0.5" />
+              )}
+              <span className="leading-relaxed">{statusMessage.text}</span>
             </div>
           )}
 
-          {/* Quick Account Switcher Selector */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
-              <span>Target Account Profile:</span>
-              <span className="text-slate-500 text-[10px]">Select from enrolled database</span>
-            </label>
-            <select
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors"
-            >
-              {usersList.map(u => (
-                <option key={u.id} value={u.email}>
-                  {u.name} — ({u.role.toUpperCase()}) [{u.email}]
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* 1. BIOMETRIC TAB (Android BiometricPrompt Standard) */}
-          {authMode === 'biometric' && (
-            <div className="space-y-5 text-center">
-              <div className="p-6 rounded-3xl bg-slate-950/80 border border-slate-800 flex flex-col items-center justify-center relative overflow-hidden">
-                {/* Visual pulse rings */}
-                <div className={`w-28 h-28 rounded-full flex items-center justify-center transition-all ${
-                  isBiometricScanning 
-                    ? 'bg-emerald-500/20 text-emerald-400 scale-110 shadow-emerald-500/30 shadow-2xl animate-pulse' 
-                    : 'bg-slate-800/80 text-emerald-400 hover:bg-emerald-500/10'
-                }`}>
-                  <Fingerprint className={`w-14 h-14 ${isBiometricScanning ? 'animate-bounce' : ''}`} />
-                </div>
-
-                <h4 className="text-sm font-bold text-white mt-4 flex items-center gap-1.5">
-                  <Smartphone className="w-4 h-4 text-emerald-400" />
-                  Android BiometricPrompt & WebAuthn
-                </h4>
-                <p className="text-xs text-slate-400 mt-1 max-w-xs">
-                  Touch the fingerprint sensor or look at your camera to verify biometric signature.
-                </p>
-
-                <div className="mt-4 flex items-center gap-2 text-[11px] text-slate-400 bg-slate-900/90 px-3 py-1.5 rounded-full border border-slate-800">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Class 3 Strong Biometric Hardware Protected</span>
-                </div>
+          {/* MODE 1: PASSWORD SIGN-IN */}
+          {authMode === 'password' && (
+            <form onSubmit={handlePasswordLogin} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="user@aurapredict.org"
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none transition-colors"
+                />
               </div>
 
-              <button
-                type="button"
-                onClick={handleTriggerBiometrics}
-                disabled={isBiometricScanning}
-                className="w-full py-3.5 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Fingerprint className="w-5 h-5" />
-                {isBiometricScanning ? 'Verifying Hardware Signature...' : 'Authenticate with Biometrics'}
-              </button>
-            </div>
-          )}
-
-          {/* 2. OPENCV FACE ID TAB */}
-          {authMode === 'face_id' && (
-            <div className="space-y-4">
-              <div className="relative rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 aspect-video flex items-center justify-center">
-                {cameraActive ? (
-                  <video 
-                    ref={videoRef} 
-                    playsInline 
-                    muted 
-                    className="w-full h-full object-cover transform -scale-x-100" 
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Password</label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none transition-colors"
                   />
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-slate-500 p-6 text-center space-y-2">
-                    <Camera className="w-12 h-12 text-slate-600 animate-pulse" />
-                    <span className="text-xs">Webcam stream initializing or running in simulated optical mode</span>
-                  </div>
-                )}
-
-                <canvas ref={canvasRef} className="hidden" />
-
-                {/* Laser scan HUD overlay */}
-                <div className="absolute inset-0 pointer-events-none border-2 border-cyan-500/40 rounded-3xl m-3 flex flex-col justify-between p-3">
-                  <div className="flex justify-between items-start">
-                    <span className="text-[10px] bg-cyan-950/80 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/40 flex items-center gap-1 font-mono">
-                      <Scan className="w-3 h-3" />
-                      OPENCV 68-PT MESH
-                    </span>
-                    <span className="text-[10px] bg-emerald-950/80 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/40 font-mono">
-                      LIVENESS: ACTIVE
-                    </span>
-                  </div>
-
-                  {/* Center reticle */}
-                  <div className="self-center w-32 h-40 border-2 border-dashed border-cyan-400/60 rounded-2xl animate-pulse relative flex items-center justify-center">
-                    <div className="absolute w-2 h-2 border-t-2 border-l-2 border-cyan-400 top-0 left-0" />
-                    <div className="absolute w-2 h-2 border-t-2 border-r-2 border-cyan-400 top-0 right-0" />
-                    <div className="absolute w-2 h-2 border-b-2 border-l-2 border-cyan-400 bottom-0 left-0" />
-                    <div className="absolute w-2 h-2 border-b-2 border-r-2 border-cyan-400 bottom-0 right-0" />
-                    <Eye className="w-6 h-6 text-cyan-400/40" />
-                  </div>
-
-                  <div className="text-[10px] text-slate-400 bg-black/60 px-2.5 py-1 rounded-lg backdrop-blur-xs font-mono text-center">
-                    Align face within reticle • Blink naturally for liveness check
-                  </div>
+                  <Lock className="absolute right-3.5 top-3 h-4 w-4 text-slate-500 pointer-events-none" />
                 </div>
               </div>
 
-              {/* Agent Thought Breakdown */}
-              {faceDetectionLogs.length > 0 && (
-                <div className="p-3 bg-slate-950/90 rounded-xl border border-slate-800 text-[11px] font-mono text-cyan-300 space-y-1">
-                  <div className="text-slate-400 font-bold flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                    OpenCV Agent Reasoning Chain:
+              {/* Quick Persona Selector */}
+              {usersList.length > 0 && (
+                <div>
+                  <span className="block text-[11px] font-semibold text-slate-400 mb-2">Or Quick Switch Profile:</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {usersList.slice(0, 4).map(u => (
+                      <button
+                        key={u.id}
+                        type="button"
+                        onClick={() => {
+                          setEmail(u.email);
+                          setPassword('AuraPredict2026!');
+                        }}
+                        className={`text-left p-2 rounded-lg border text-xs transition-all ${
+                          email.toLowerCase() === u.email.toLowerCase()
+                            ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-300'
+                            : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                        }`}
+                      >
+                        <p className="font-semibold truncate">{u.name}</p>
+                        <p className="text-[10px] text-slate-500 capitalize">{u.role.replace('_', ' ')}</p>
+                      </button>
+                    ))}
                   </div>
-                  {faceDetectionLogs.map((log, i) => (
-                    <div key={i} className="text-slate-300 truncate">
-                      {log}
-                    </div>
-                  ))}
-                  {faceConfidence && (
-                    <div className="text-emerald-400 font-bold mt-1">
-                      Identity Match Confidence: {faceConfidence}% (Unit Hypersphere Distance &lt; 0.18)
-                    </div>
-                  )}
                 </div>
               )}
 
               <button
-                type="button"
-                onClick={handleCaptureAndScanFace}
-                disabled={isFaceScanning}
-                className="w-full py-3.5 px-4 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Camera className="w-5 h-5" />
-                {isFaceScanning ? 'OpenCV Agent Scanning...' : 'Scan & Identify Face'}
-              </button>
-            </div>
-          )}
-
-          {/* 3. PASSWORD LOGIN TAB */}
-          {authMode === 'password' && (
-            <form onSubmit={handlePasswordLogin} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="name@aurapredict.org"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Cryptographic Password</label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    placeholder="••••••••••••"
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
-                  />
-                  <Lock className="w-4 h-4 text-slate-500 absolute right-3.5 top-3" />
-                </div>
-                <p className="text-[10px] text-slate-500 mt-1">Demo password is <code className="text-indigo-300 font-mono">AuraPredict2026!</code></p>
-              </div>
-
-              <button
                 type="submit"
-                className="w-full py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                disabled={statusMessage.type === 'loading'}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-500 transition-colors disabled:opacity-50"
               >
-                <LogIn className="w-4 h-4" />
-                Sign In with Password
+                <LogIn className="h-4 w-4" />
+                Sign In to Account
               </button>
             </form>
           )}
 
-          {/* 4. REGISTRATION TAB */}
+          {/* MODE 2: REGISTER ACCOUNT */}
           {authMode === 'register' && (
             <form onSubmit={handleRegister} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Full Name</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
                 <input
                   type="text"
+                  required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  required
-                  placeholder="Dr. Rajesh Gupta"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
+                  placeholder="e.g. Dr. Aryan Sharma"
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
                 <input
                   type="email"
+                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="rajesh.gupta@delhi-cleanair.org"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
+                  placeholder="name@aurapredict.org"
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Role</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Role Persona</label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as any)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none transition-colors"
                 >
-                  <option value="citizen">Citizen (General Public)</option>
-                  <option value="epidemiologist">Epidemiologist (Health Vulnerability Analysis)</option>
-                  <option value="city_planner">City Planner (Emission Zone Routing)</option>
-                  <option value="industrial_auditor">Industrial Auditor (Chimney & Plume Compliance)</option>
-                  <option value="station_operator">Station Operator (Telemetry Calibration)</option>
+                  <option value="citizen">Citizen (Personal Alerts & Routes)</option>
+                  <option value="epidemiologist">Epidemiologist (Health Impact Analysis)</option>
+                  <option value="city_planner">City Planner (Interventions & Policy)</option>
+                  <option value="industrial_auditor">Industrial Auditor (Compliance & Plumes)</option>
+                  <option value="station_operator">Station Operator (Sensor Telemetry)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Set Password</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Create Password</label>
                 <input
                   type="password"
+                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="••••••••••••"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
+                  placeholder="Minimum 8 characters"
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none transition-colors"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3.5 px-4 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm shadow-lg shadow-purple-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
+                disabled={statusMessage.type === 'loading'}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-500 transition-colors disabled:opacity-50 mt-2"
               >
-                <UserPlus className="w-4 h-4" />
-                Create Account & Enroll Keys
+                <UserCheck className="h-4 w-4" />
+                Complete Registration
               </button>
             </form>
           )}
 
         </div>
 
-        {/* Footer */}
-        <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>PBKDF2/SHA-512 + FIDO2 + OpenCV 512-dim</span>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors"
-          >
-            Cancel
-          </button>
+        {/* Footer info */}
+        <div className="border-t border-slate-800 bg-slate-950/60 px-5 py-3 text-center text-[11px] text-slate-500">
+          Encrypted Authentication • Zero Cross-Site Trackers
         </div>
-
       </div>
     </div>
   );
