@@ -294,23 +294,9 @@ export default function App() {
     }
   };
 
-  // Update Profile & MFA
+  // Update Profile
   const handleUpdateUser = (updatedFields: Partial<UserProfile>) => {
     setUser(prev => ({ ...prev, ...updatedFields }));
-  };
-
-  const handleToggleMFA = (enabled: boolean, method?: 'app' | 'sms' | 'security_key') => {
-    setUser(prev => ({ ...prev, mfaEnabled: enabled, mfaMethod: method || prev.mfaMethod }));
-    const log: SecurityAuditLog = {
-      id: `log_${Date.now()}`,
-      timestamp: new Date().toISOString().substring(0, 19).replace('T', ' '),
-      event: `Multi-Factor Auth ${enabled ? 'Activated' : 'Deactivated'} (${method || 'app'})`,
-      ipAddress: '127.0.0.1',
-      location: 'Security Core Vault',
-      device: 'AuraPredict Auth Suite',
-      status: 'success'
-    };
-    setAuditLogs(prev => [log, ...prev]);
   };
 
   return (
@@ -506,7 +492,6 @@ export default function App() {
                       user={user}
                       auditLogs={auditLogs}
                       onUpdateUser={handleUpdateUser}
-                      onToggleMFA={handleToggleMFA}
                     />
                   </div>
                 )}

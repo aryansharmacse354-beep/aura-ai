@@ -107,7 +107,7 @@ const SYSTEM_DECKS: DeckGroup[] = [
   {
     id: 'system',
     label: 'Edge GIS & Vault',
-    badge: 'MFA & Offline',
+    badge: 'Offline & Profile',
     icon: ShieldCheck,
     tabs: [
       { id: 'offline', label: 'Offline Maps', icon: HardDriveDownload },

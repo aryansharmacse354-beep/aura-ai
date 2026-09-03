@@ -46,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'simulator', label: 'GenAI Policy Sim', icon: Sliders, badge: 'Executive' },
     { id: 'health', label: 'Health & Alerts', icon: HeartPulse, badge: 'Personalized' },
     { id: 'offline', label: 'Offline Maps', icon: HardDriveDownload, badge: isOffline ? 'Active' : 'Ready' },
-    { id: 'profile', label: 'Security & Profile', icon: ShieldCheck, badge: user.mfaEnabled ? 'MFA On' : 'Setup' }
+    { id: 'profile', label: 'Security & Profile', icon: ShieldCheck, badge: 'Profile' }
   ];
 
   return (

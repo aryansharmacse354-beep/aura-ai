@@ -18,8 +18,6 @@ export interface UserProfile {
   avatarUrl?: string;
   healthConditions: HealthCondition[];
   alertThresholdAQI: number;
-  mfaEnabled: boolean;
-  mfaMethod?: 'app' | 'sms' | 'security_key';
   savedLocations: { name: string; lat: number; lng: number }[];
   offlineRegions: string[];
   lastLogin: string;

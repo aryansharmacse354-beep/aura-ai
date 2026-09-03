@@ -460,35 +460,6 @@ app.post('/api/auth/update-profile', async (req, res) => {
   }
 });
 
-// Toggle MFA
-app.post('/api/auth/mfa-toggle', async (req, res) => {
-  try {
-    const currentUser = getAuthenticatedUser(req);
-    const { enabled, method } = req.body;
-
-    const updatedUser = await db.updateUser(currentUser.id, {
-      mfaEnabled: Boolean(enabled),
-      mfaMethod: method || currentUser.mfaMethod || 'app'
-    });
-
-    const logEntry = await db.addAuditLog({
-      event: `Multi-Factor Authentication ${enabled ? 'Enabled' : 'Disabled'} (${method || 'app'}) for ${currentUser.email}`,
-      ipAddress: req.ip || '127.0.0.1',
-      location: 'Security Core Manager',
-      device: req.headers['user-agent'] || 'AuraPredict Key Vault',
-      status: 'success'
-    });
-
-    if (updatedUser) {
-      const { passwordHash, salt, ...safeUser } = updatedUser;
-      return res.json({ user: safeUser, auditLog: logEntry });
-    }
-    res.status(404).json({ error: 'User not found.' });
-  } catch (err: any) {
-    res.status(500).json({ error: 'MFA update failed.' });
-  }
-});
-
 // =========================================================================
 // ATMOSPHERIC ML FUNCTIONAL ENGINE ENDPOINTS
 // =========================================================================

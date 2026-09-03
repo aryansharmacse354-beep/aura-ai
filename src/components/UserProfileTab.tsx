@@ -29,7 +29,6 @@ interface UserProfileTabProps {
   user: UserProfile;
   auditLogs: SecurityAuditLog[];
   onUpdateUser: (updatedFields: Partial<UserProfile>) => void;
-  onToggleMFA: (enabled: boolean, method?: 'app' | 'sms' | 'security_key') => void;
 }
 
 const AVATAR_PRESETS = [
@@ -54,8 +53,7 @@ const HEALTH_OPTIONS: { id: HealthCondition; label: string; desc: string }[] = [
 export const UserProfileTab: React.FC<UserProfileTabProps> = ({
   user,
   auditLogs,
-  onUpdateUser,
-  onToggleMFA
+  onUpdateUser
 }) => {
   // Sync state variables with incoming user prop
   const [userName, setUserName] = useState(user.name);
@@ -426,103 +424,12 @@ export const UserProfileTab: React.FC<UserProfileTabProps> = ({
             </form>
           </div>
 
-          {/* MFA Setup Card */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 shadow-xl">
-            <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
-              <h3 className="font-bold text-sm text-slate-100 flex items-center space-x-2">
-                <Smartphone className="w-4 h-4 text-emerald-400" />
-                <span>Multi-Factor Authentication (MFA)</span>
-              </h3>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                user.mfaEnabled ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300'
-              }`}>
-                {user.mfaEnabled ? 'MFA Active' : 'Disabled'}
-              </span>
-            </div>
-
-            <p className="text-xs text-slate-400">Protect municipal and personal health profile access with dual-factor security tokens:</p>
-
-            <div className="space-y-2 text-xs">
-              {/* Option 1: Authenticator App */}
-              <button
-                type="button"
-                onClick={() => onToggleMFA(!user.mfaEnabled, 'app')}
-                className={`w-full p-3 rounded-xl border font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                  user.mfaEnabled && user.mfaMethod === 'app'
-                    ? 'bg-emerald-500/15 border-emerald-500/40 text-slate-100 shadow-sm'
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <div className="flex items-center space-x-2.5">
-                  <Smartphone className="w-4 h-4 text-emerald-400" />
-                  <div className="text-left">
-                    <span className="block text-slate-200">Authenticator App (TOTP)</span>
-                    <span className="text-[10px] text-slate-400 font-mono">Google Authenticator / Authy / 1Password</span>
-                  </div>
-                </div>
-                <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded ${
-                  user.mfaEnabled && user.mfaMethod === 'app' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-500'
-                }`}>
-                  {user.mfaEnabled && user.mfaMethod === 'app' ? 'Active' : 'Select'}
-                </span>
-              </button>
-
-              {/* Option 2: Security Key */}
-              <button
-                type="button"
-                onClick={() => onToggleMFA(true, 'security_key')}
-                className={`w-full p-3 rounded-xl border font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                  user.mfaEnabled && user.mfaMethod === 'security_key'
-                    ? 'bg-emerald-500/15 border-emerald-500/40 text-slate-100 shadow-sm'
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <div className="flex items-center space-x-2.5">
-                  <Key className="w-4 h-4 text-teal-400" />
-                  <div className="text-left">
-                    <span className="block text-slate-200">Hardware Security Key</span>
-                    <span className="text-[10px] text-slate-400 font-mono">YubiKey / WebAuthn Biometric</span>
-                  </div>
-                </div>
-                <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded ${
-                  user.mfaEnabled && user.mfaMethod === 'security_key' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-500'
-                }`}>
-                  {user.mfaEnabled && user.mfaMethod === 'security_key' ? 'Active' : 'Select'}
-                </span>
-              </button>
-
-              {/* Option 3: SMS Verification */}
-              <button
-                type="button"
-                onClick={() => onToggleMFA(true, 'sms')}
-                className={`w-full p-3 rounded-xl border font-semibold flex items-center justify-between transition-all cursor-pointer ${
-                  user.mfaEnabled && user.mfaMethod === 'sms'
-                    ? 'bg-emerald-500/15 border-emerald-500/40 text-slate-100 shadow-sm'
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <div className="flex items-center space-x-2.5">
-                  <MessageSquare className="w-4 h-4 text-blue-400" />
-                  <div className="text-left">
-                    <span className="block text-slate-200">SMS Verification Code</span>
-                    <span className="text-[10px] text-slate-400 font-mono">Mobile SMS OTP Passcode</span>
-                  </div>
-                </div>
-                <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded ${
-                  user.mfaEnabled && user.mfaMethod === 'sms' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-500'
-                }`}>
-                  {user.mfaEnabled && user.mfaMethod === 'sms' ? 'Active' : 'Select'}
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* Password & Security Token Card */}
+          {/* Account Password Card */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 shadow-xl">
             <div className="border-b border-slate-800 pb-2">
               <h3 className="font-bold text-sm text-slate-100 flex items-center space-x-2">
                 <KeyRound className="w-4 h-4 text-emerald-400" />
-                <span>Security Token & Password Hash</span>
+                <span>Account Password</span>
               </h3>
             </div>
 
@@ -539,7 +446,7 @@ export const UserProfileTab: React.FC<UserProfileTabProps> = ({
               </div>
 
               <div>
-                <label className="text-slate-400 font-semibold block mb-1">New SHA256 Password</label>
+                <label className="text-slate-400 font-semibold block mb-1">New Password</label>
                 <input
                   type="password"
                   placeholder="••••••••"
@@ -563,9 +470,9 @@ export const UserProfileTab: React.FC<UserProfileTabProps> = ({
               <button
                 type="submit"
                 disabled={!newPass || newPass.length < 6}
-                className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl border border-slate-700 disabled:opacity-50 transition-colors cursor-pointer"
+                className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-xl disabled:opacity-50 transition-colors cursor-pointer"
               >
-                Update Password Hash
+                Update Password
               </button>
             </form>
 

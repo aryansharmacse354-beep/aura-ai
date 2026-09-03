@@ -66,8 +66,7 @@ export function useAuth() {
         return {
           ...matched,
           healthConditions: prev.healthConditions,
-          alertThresholdAQI: prev.alertThresholdAQI,
-          mfaEnabled: prev.mfaEnabled
+          alertThresholdAQI: prev.alertThresholdAQI
         };
       }
       return {

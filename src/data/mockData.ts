@@ -9,8 +9,6 @@ export const INITIAL_USER_PROFILES: UserProfile[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     healthConditions: ['asthma', 'outdoor_worker'],
     alertThresholdAQI: 120,
-    mfaEnabled: true,
-    mfaMethod: 'app',
     savedLocations: [
       { name: 'Home Base', lat: 28.6139, lng: 77.2090 },
       { name: 'Research Lab', lat: 28.5355, lng: 77.3910 }
@@ -27,8 +25,6 @@ export const INITIAL_USER_PROFILES: UserProfile[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     healthConditions: ['cardiovascular'],
     alertThresholdAQI: 150,
-    mfaEnabled: true,
-    mfaMethod: 'security_key',
     savedLocations: [
       { name: 'Municipal City Hall', lat: 28.6304, lng: 77.2177 },
       { name: 'Industrial Monitoring Station 4', lat: 28.7041, lng: 77.1025 }

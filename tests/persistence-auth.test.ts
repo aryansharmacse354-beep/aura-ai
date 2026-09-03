@@ -59,8 +59,6 @@ describe('Database Persistence Layer & Audit Trail', () => {
       role: 'analyst',
       healthConditions: ['asthma'],
       alertThresholdAQI: 110,
-      mfaEnabled: true,
-      mfaMethod: 'app',
       savedLocations: [{ name: 'Research Lab', lat: 28.5355, lng: 77.3910 }],
       offlineRegions: ['off_delhi_core'],
       lastLogin: new Date().toISOString(),

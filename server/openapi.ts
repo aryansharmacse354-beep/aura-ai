@@ -61,8 +61,7 @@ export const openApiSpec = {
           role: { type: 'string', enum: ['citizen', 'researcher', 'policymaker', 'health_official', 'industrial_operator'], example: 'researcher' },
           avatar: { type: 'string' },
           healthConditions: { type: 'array', items: { type: 'string' }, example: ['asthma'] },
-          alertThresholdAQI: { type: 'number', example: 150 },
-          mfaEnabled: { type: 'boolean', example: true }
+          alertThresholdAQI: { type: 'number', example: 150 }
         }
       },
       ForecastRequest: {

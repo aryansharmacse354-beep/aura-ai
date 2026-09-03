@@ -30,11 +30,11 @@
         "off_delhi_core",
         "off_mumbai_metro"
       ],
-      "lastLogin": "2026-09-03T16:11:13.280Z",
+      "lastLogin": "2026-09-03T16:17:18.996Z",
       "createdAt": "2026-08-05T12:11:12.595Z",
       "passwordHash": "d067e7a818bfc02613d2a9c0c4309705f986108288b4b360aaa7f9530885ab13487e2d0cdea85e6d25518f951a8cd9fe02d80fc4693e518c8d71939c3e22a6d2",
       "salt": "23bff3de6f792d75f49c6ddc362a526d",
-      "updatedAt": "2026-09-03T16:11:13.281Z"
+      "updatedAt": "2026-09-03T16:17:18.997Z"
     },
     {
       "id": "usr_planner_02",
@@ -1101,6 +1101,52 @@
       "salt": "86f592c552bd4cb99e2833c7908822f5",
       "createdAt": "2026-09-03T16:11:13.233Z",
       "updatedAt": "2026-09-03T16:11:13.233Z"
+    },
+    {
+      "id": "usr_test_1788452237879",
+      "name": "Dr. Jane Environmental",
+      "email": "test.researcher.1788452237868@aurapredict.ai",
+      "role": "analyst",
+      "healthConditions": [
+        "asthma"
+      ],
+      "alertThresholdAQI": 110,
+      "savedLocations": [
+        {
+          "name": "Research Lab",
+          "lat": 28.5355,
+          "lng": 77.391
+        }
+      ],
+      "offlineRegions": [
+        "off_delhi_core"
+      ],
+      "lastLogin": "2026-09-03T16:17:17.881Z",
+      "passwordHash": "72d890adfb1f5884c4415493bf384256ff1781066b7f5379709edeaeafcb0d1841d89a74a820a9431f089596afcb1423611c631ccd1fcc1dbc73a93303624009",
+      "salt": "fa16ba8bb0c1c17797709dece2e813f1",
+      "createdAt": "2026-09-03T16:17:17.881Z",
+      "updatedAt": "2026-09-03T16:17:17.881Z"
+    },
+    {
+      "id": "usr_1788452238962_u1m2q",
+      "name": "Dr. Integration Tester",
+      "email": "integration.tester.1788452238936@aurapredict.ai",
+      "role": "policymaker",
+      "healthConditions": [
+        "hypertension"
+      ],
+      "alertThresholdAQI": 130,
+      "mfaEnabled": true,
+      "mfaMethod": "app",
+      "savedLocations": [],
+      "offlineRegions": [
+        "off_delhi_core"
+      ],
+      "lastLogin": "2026-09-03T16:17:18.962Z",
+      "passwordHash": "f523f3aaf037792ddfeb62880d7a70d79188b8945c71a8eea80fa3f99a71be44c0b711ba8f526a372f6910c3ef9ab1324d98c8225c374ced1734655e851bf6ae",
+      "salt": "7a84bb00858600615fc10e1bd7ee4d33",
+      "createdAt": "2026-09-03T16:17:18.962Z",
+      "updatedAt": "2026-09-03T16:17:18.962Z"
     }
   ],
   "sessions": [
@@ -1651,9 +1697,82 @@
       "expiresAt": 1789056673298,
       "ip": "::ffff:127.0.0.1",
       "authMethod": "password"
+    },
+    {
+      "token": "4105f4821b36e838f39ea3cc3fee8debdd7a5758f9f6b310fa21fbc4ba4e08c6",
+      "userId": "usr_test_1",
+      "email": "test@aurapredict.ai",
+      "role": "researcher",
+      "expiresAt": 1789057037892,
+      "ip": "127.0.0.1",
+      "userAgent": "Vitest Agent",
+      "authMethod": "password"
+    },
+    {
+      "token": "2ca024e844cb1bf507d853cf5c75d8ce83778344bb8c384e0411054dda83910a",
+      "userId": "usr_1788452238962_u1m2q",
+      "email": "integration.tester.1788452238936@aurapredict.ai",
+      "role": "policymaker",
+      "expiresAt": 1789057038970,
+      "ip": "::ffff:127.0.0.1",
+      "authMethod": "password"
+    },
+    {
+      "token": "62e6c6b87e042195ce08c809773ae8d6b62b7a27bc062a3d32641bc80b2d4dcd",
+      "userId": "usr_citizen_01",
+      "email": "sarah.lin@aurapredict.org",
+      "role": "citizen",
+      "expiresAt": 1789057039002,
+      "ip": "::ffff:127.0.0.1",
+      "authMethod": "password"
     }
   ],
   "auditLogs": [
+    {
+      "id": "sec-1788452244326-666554",
+      "timestamp": "2026-09-03T16:17:24.326Z",
+      "event": "Clean Air Route Saved: Safe School Commute (42% exposure reduction)",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "GIS Route Engine",
+      "device": "AuraPredict Navigation Suite",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788452239032-3ba54e",
+      "timestamp": "2026-09-03T16:17:19.032Z",
+      "event": "Failed Authentication Attempt for sarah.lin@aurapredict.org",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "Security Core",
+      "device": "AuraPredict Web Client",
+      "status": "failed"
+    },
+    {
+      "id": "sec-1788452239011-5f8b6f",
+      "timestamp": "2026-09-03T16:17:19.011Z",
+      "event": "Authenticated via PBKDF2/SHA512 Session Handshake (sarah.lin@aurapredict.org)",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "Verified User Node",
+      "device": "AuraPredict Client Suite",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788452238977-f635ea",
+      "timestamp": "2026-09-03T16:17:18.977Z",
+      "event": "New Account Created (integration.tester.1788452238936@aurapredict.ai) with PBKDF2 Encryption",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "Encrypted Node Database",
+      "device": "AuraPredict Web Suite",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788452237902-c384d2",
+      "timestamp": "2026-09-03T16:17:17.902Z",
+      "event": "Automated Test Security Audit Handshake",
+      "ipAddress": "10.0.0.42",
+      "location": "Test Subnet",
+      "device": "CI Test Runner",
+      "status": "success"
+    },
     {
       "id": "sec-1788451876546-50db7d",
       "timestamp": "2026-09-03T16:11:16.547Z",
@@ -2620,6 +2739,28 @@
   ],
   "savedSimulations": [],
   "savedRoutes": [
+    {
+      "id": "route-1788452244318-26c95d",
+      "createdAt": "2026-09-03T16:17:24.318Z",
+      "userId": "usr_1788452238962_u1m2q",
+      "name": "Safe School Commute",
+      "origin": "Dwarka Sector 10",
+      "destination": "Connaught Place",
+      "distanceKm": 18.2,
+      "exposureReductionPct": 42,
+      "waypoints": [
+        {
+          "lat": 28.5921,
+          "lng": 77.046,
+          "aqi": 110
+        },
+        {
+          "lat": 28.6315,
+          "lng": 77.2167,
+          "aqi": 95
+        }
+      ]
+    },
     {
       "id": "route-1788451876538-cf0c12",
       "createdAt": "2026-09-03T16:11:16.538Z",

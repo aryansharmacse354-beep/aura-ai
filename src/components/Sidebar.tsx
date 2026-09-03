@@ -109,7 +109,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
     badge: '2 Services',
     items: [
       { id: 'offline', label: 'Offline Map Packages', icon: HardDriveDownload, badge: 'Edge GIS', desc: 'Local IndexedDB offline tile cache' },
-      { id: 'profile', label: 'Security & Profile', icon: ShieldCheck, badge: 'MFA Vault', desc: 'RBAC, biometric credentials & audit logs' }
+      { id: 'profile', label: 'Security & Profile', icon: ShieldCheck, badge: 'Profile', desc: 'RBAC, role settings & audit logs' }
     ]
   }
 ];
