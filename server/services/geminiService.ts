@@ -4,16 +4,12 @@ import { logger } from './loggerService';
 
 dotenv.config();
 
-export const isGeminiKeyProvided = Boolean(
-  process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MOCK_KEY_FOR_LOCAL'
-);
+const resolvedKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '';
 
-if (!isGeminiKeyProvided) {
-  logger.info('[Security Notice] GEMINI_API_KEY is not set or in test mode. Fallback physics & spatial synthesis engines will serve requests deterministically.', { context: 'GeminiService' });
-}
+export const isGeminiKeyProvided = Boolean(resolvedKey && resolvedKey !== 'MOCK_KEY_FOR_LOCAL');
 
 export const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || 'MOCK_KEY_FOR_LOCAL',
+  apiKey: resolvedKey || 'MOCK_KEY_FOR_LOCAL',
   httpOptions: {
     headers: {
       'User-Agent': 'aistudio-build',
