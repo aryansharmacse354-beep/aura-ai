@@ -79,6 +79,8 @@ export interface DatabaseSchema {
 
 const DATA_DIR = process.env.DATA_DIR 
   ? path.resolve(process.env.DATA_DIR) 
+  : process.env.VERCEL 
+  ? path.join('/tmp', 'aura-data')
   : path.join(process.cwd(), 'data');
 
 const DB_FILE = path.join(DATA_DIR, 'aurapredict_database.json');

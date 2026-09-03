@@ -284,8 +284,11 @@ export async function callGeminiResiliently(params: {
       }
     } catch (err: any) {
       const errMsg = err?.message || String(err);
+      const isQuota = errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('RESOURCE_EXHAUSTED');
       console.warn(`[Gemini API] Query to ${model} received notice: ${errMsg.slice(0, 120)}`);
-      // Seamlessly cascade to next model in the list
+      if (isQuota) {
+        break; // Fast-path to deterministic fallback immediately
+      }
       continue;
     }
   }
@@ -1695,6 +1698,6 @@ export async function startServer() {
   return server;
 }
 
-if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
+if (process.env.NODE_ENV !== 'test' && !process.env.VITEST && !process.env.VERCEL) {
   startServer();
 }
