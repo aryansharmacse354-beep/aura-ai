@@ -24,6 +24,7 @@ const AQIHistoricalDataTab = lazy(() => import('./components/AQIHistoricalDataTa
 const AtmosphericMLLabTab = lazy(() => import('./components/AtmosphericMLLabTab').then(m => ({ default: m.AtmosphericMLLabTab })));
 const GeminiChatbotTab = lazy(() => import('./components/GeminiChatbotTab').then(m => ({ default: m.GeminiChatbotTab })));
 const AtmosphericImageStudioTab = lazy(() => import('./components/AtmosphericImageStudioTab').then(m => ({ default: m.AtmosphericImageStudioTab })));
+const AuthModal = lazy(() => import('./components/AuthModal').then(m => ({ default: m.AuthModal })));
 
 import { 
   AQIMeasurement, 
@@ -69,7 +70,9 @@ export default function App() {
   const [auditLogs, setAuditLogs] = useState<SecurityAuditLog[]>(INITIAL_SECURITY_LOGS);
   const [offlineRegions, setOfflineRegions] = useState<OfflineMapRegion[]>(INITIAL_OFFLINE_REGIONS);
   const [showRoleModal, setShowRoleModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showInstallModal, setShowInstallModal] = useState(false);
+  const [cityOverrides, setCityOverrides] = useState<Record<string, Partial<AQIMeasurement>>>({});
   const [deferredPrompt, setDeferredPrompt] = useState<any | null>(null);
   const [isInstalled, setIsInstalled] = useState<boolean>(() => {
     try {
@@ -124,7 +127,35 @@ export default function App() {
   const [simulationResult, setSimulationResult] = useState<PolicySimulationResult | null>(null);
   const [isSimulatingPolicy, setIsSimulatingPolicy] = useState(false);
 
-  const currentCityData: AQIMeasurement = CITIES_AQI_DATA.find(c => c.cityId === selectedCityId) || CITIES_AQI_DATA[0];
+  const baseCityData: AQIMeasurement = CITIES_AQI_DATA.find(c => c.cityId === selectedCityId) || CITIES_AQI_DATA[0];
+  const currentCityData: AQIMeasurement = {
+    ...baseCityData,
+    ...(cityOverrides[selectedCityId] || {}),
+    weather: {
+      ...baseCityData.weather,
+      ...(cityOverrides[selectedCityId]?.weather || {})
+    }
+  };
+
+  const handleApplyMLModel = (adjustment: {
+    adjustedAQI: number;
+    adjustedBoundaryLayerM: number;
+    dispersionMultiplier: number;
+    photochemicalOzoneShift: number;
+    regimeName: string;
+  }) => {
+    setCityOverrides(prev => ({
+      ...prev,
+      [selectedCityId]: {
+        ...(prev[selectedCityId] || {}),
+        aqi: adjustment.adjustedAQI,
+        weather: {
+          ...currentCityData.weather,
+          boundaryLayerHeightM: adjustment.adjustedBoundaryLayerM
+        }
+      }
+    }));
+  };
 
   // Initialize GPS Real-Time Location Tracking
   useEffect(() => {
@@ -292,6 +323,7 @@ export default function App() {
         setActiveTab={setActiveTab}
         user={user}
         onOpenRoleModal={() => setShowRoleModal(true)}
+        onOpenAuthModal={() => setShowAuthModal(true)}
         onOpenInstallModal={() => setShowInstallModal(true)}
         isInstalled={isInstalled}
         hasInstallPrompt={!!deferredPrompt}
@@ -401,6 +433,7 @@ export default function App() {
                   <div className="h-full overflow-y-auto pr-1.5 custom-scrollbar">
                     <AtmosphericMLLabTab
                       currentCityData={currentCityData}
+                      onApplyMLModel={handleApplyMLModel}
                     />
                   </div>
                 )}
@@ -491,6 +524,16 @@ export default function App() {
               currentCityData={currentCityData}
               onRoleChange={handleRoleChange}
               onClose={() => setShowRoleModal(false)}
+            />
+          </Suspense>
+        )}
+
+        {/* Multi-Modal Biometric & OpenCV Facial Authentication Modal */}
+        {showAuthModal && (
+          <Suspense fallback={null}>
+            <AuthModal
+              isOpen={showAuthModal}
+              onClose={() => setShowAuthModal(false)}
             />
           </Suspense>
         )}

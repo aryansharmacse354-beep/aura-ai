@@ -30,11 +30,11 @@
         "off_delhi_core",
         "off_mumbai_metro"
       ],
-      "lastLogin": "2026-09-03T15:08:55.168Z",
+      "lastLogin": "2026-09-03T15:07:48.978Z",
       "createdAt": "2026-08-05T12:11:12.595Z",
       "passwordHash": "d067e7a818bfc02613d2a9c0c4309705f986108288b4b360aaa7f9530885ab13487e2d0cdea85e6d25518f951a8cd9fe02d80fc4693e518c8d71939c3e22a6d2",
       "salt": "23bff3de6f792d75f49c6ddc362a526d",
-      "updatedAt": "2026-09-03T15:08:55.168Z"
+      "updatedAt": "2026-09-03T15:07:48.978Z"
     },
     {
       "id": "usr_planner_02",
@@ -797,54 +797,9 @@
       "ip": "127.0.0.1",
       "userAgent": "Vitest Agent",
       "authMethod": "password"
-    },
-    {
-      "token": "c20d20bfe7cf1fe4f8e63b8558043d0eb9ad549e184bef0f1b7c7078e6693bf2",
-      "userId": "usr_1788448135089_mn80t",
-      "email": "integration.tester.1788448135050@aurapredict.ai",
-      "role": "policymaker",
-      "expiresAt": 1789052935110,
-      "ip": "::ffff:127.0.0.1",
-      "authMethod": "password"
-    },
-    {
-      "token": "b25a40371f4b1f64f17d07606380c529bea982fc164e0a2ddc5fe0342562a667",
-      "userId": "usr_citizen_01",
-      "email": "sarah.lin@aurapredict.org",
-      "role": "citizen",
-      "expiresAt": 1789052935176,
-      "ip": "::ffff:127.0.0.1",
-      "authMethod": "password"
     }
   ],
   "auditLogs": [
-    {
-      "id": "sec-1788448135213-be4dd0",
-      "timestamp": "2026-09-03T15:08:55.213Z",
-      "event": "Failed Authentication Attempt for sarah.lin@aurapredict.org",
-      "ipAddress": "::ffff:127.0.0.1",
-      "location": "Security Core",
-      "device": "AuraPredict Web Client",
-      "status": "failed"
-    },
-    {
-      "id": "sec-1788448135185-ac9845",
-      "timestamp": "2026-09-03T15:08:55.185Z",
-      "event": "Authenticated via PBKDF2/SHA512 Session Handshake (sarah.lin@aurapredict.org)",
-      "ipAddress": "::ffff:127.0.0.1",
-      "location": "Verified User Node",
-      "device": "AuraPredict Client Suite",
-      "status": "success"
-    },
-    {
-      "id": "sec-1788448135135-559255",
-      "timestamp": "2026-09-03T15:08:55.135Z",
-      "event": "New Account Created (integration.tester.1788448135050@aurapredict.ai) with PBKDF2 Encryption",
-      "ipAddress": "::ffff:127.0.0.1",
-      "location": "Encrypted Node Database",
-      "device": "AuraPredict Web Suite",
-      "status": "success"
-    },
     {
       "id": "sec-1788448133581-bf5ab2",
       "timestamp": "2026-09-03T15:08:53.581Z",
@@ -1280,28 +1235,6 @@
   ],
   "savedSimulations": [],
   "savedRoutes": [
-    {
-      "id": "route-1788448182278-296dbc",
-      "createdAt": "2026-09-03T15:09:42.278Z",
-      "userId": "usr_1788448135089_mn80t",
-      "name": "Safe School Commute",
-      "origin": "Dwarka Sector 10",
-      "destination": "Connaught Place",
-      "distanceKm": 18.2,
-      "exposureReductionPct": 42,
-      "waypoints": [
-        {
-          "lat": 28.5921,
-          "lng": 77.046,
-          "aqi": 110
-        },
-        {
-          "lat": 28.6315,
-          "lng": 77.2167,
-          "aqi": 95
-        }
-      ]
-    },
     {
       "id": "route-1788448098158-feaabd",
       "createdAt": "2026-09-03T15:08:18.158Z",

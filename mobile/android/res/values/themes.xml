@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- Set the splash screen background, icon, and post-splash theme -->
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_aura_aqi_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.AuraAQI</item>
+    </style>
+
+    <style name="Theme.AuraAQI" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#10B981</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#06B6D4</item>
+        <item name="android:statusBarColor">#0B0F17</item>
+    </style>
+
+    <color name="white">#FFFFFF</color>
+    <color name="aura_teal">#10B981</color>
+    <color name="aura_cyan">#06B6D4</color>
+    <color name="aura_blue">#3B82F6</color>
+</resources>

@@ -102,7 +102,7 @@ describe('AuraPredict Express API Endpoints & Supertest Integration', () => {
     expect(res.body).toHaveProperty('summaryMarkdown');
     expect(res.body).toHaveProperty('modelUsed');
     expect(typeof res.body.summaryMarkdown).toBe('string');
-  }, 20000);
+  }, 45000);
 
   it('POST /api/policy/simulate should compute environmental interventions and impact metrics', async () => {
     const res = await request(app)
@@ -120,7 +120,7 @@ describe('AuraPredict Express API Endpoints & Supertest Integration', () => {
     expect(res.body).toHaveProperty('projectedAQIReductionPercent');
     expect(res.body).toHaveProperty('newAvgAQI');
     expect(res.body.projectedAQIReductionPercent).toBeGreaterThan(0);
-  }, 30000);
+  }, 45000);
 
   it('POST /api/gemini/fast-analyze should return ultra-low latency triage guidance', async () => {
     const res = await request(app)

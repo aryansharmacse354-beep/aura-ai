@@ -4,12 +4,37 @@ import crypto from 'crypto';
 import { UserProfile, SecurityAuditLog, PolicySimulationResult } from '../src/types';
 import { INITIAL_USER_PROFILES, INITIAL_SECURITY_LOGS } from '../src/data/mockData';
 
+export interface BiometricCredential {
+  credentialId: string;
+  publicKey: string;
+  counter: number;
+  deviceName: string;
+  authenticatorType: 'android_biometric' | 'passkey' | 'windows_hello' | 'touch_id' | 'face_id';
+  createdAt: string;
+}
+
+export interface FacialBiometricRecord {
+  vector: number[]; // 512-dim embedding
+  confidence: number;
+  livenessPassed: boolean;
+  enrolledAt: string;
+}
+
+export interface BiometricChallenge {
+  challengeId: string;
+  challenge: string; // Cryptographic nonce
+  userId?: string;
+  expiresAt: number;
+}
+
 export interface UserAccount extends UserProfile {
   passwordHash: string;
   salt: string;
   createdAt: string;
   updatedAt: string;
   lastLogin: string;
+  biometricCredentials?: BiometricCredential[];
+  facialBiometrics?: FacialBiometricRecord;
 }
 
 export interface UserSession {
@@ -20,6 +45,7 @@ export interface UserSession {
   expiresAt: number; // epoch ms
   ip?: string;
   userAgent?: string;
+  authMethod?: 'password' | 'biometric' | 'facial_opencv';
 }
 
 export interface StoredRouteRecord {
@@ -48,6 +74,7 @@ export interface DatabaseSchema {
     result: PolicySimulationResult;
   }>;
   savedRoutes: StoredRouteRecord[];
+  biometricChallenges?: BiometricChallenge[];
 }
 
 const DATA_DIR = process.env.DATA_DIR 
@@ -235,7 +262,14 @@ class PersistentDatabase {
   }
 
   // --- Sessions ---
-  public async createSession(userId: string, email: string, role: string, ip?: string, userAgent?: string): Promise<UserSession> {
+  public async createSession(
+    userId: string, 
+    email: string, 
+    role: string, 
+    ip?: string, 
+    userAgent?: string,
+    authMethod: 'password' | 'biometric' | 'facial_opencv' = 'password'
+  ): Promise<UserSession> {
     const token = generateSessionToken();
     const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
     const session: UserSession = {
@@ -245,13 +279,80 @@ class PersistentDatabase {
       role,
       expiresAt,
       ip,
-      userAgent
+      userAgent,
+      authMethod
     };
     // Purge expired sessions
     this.data.sessions = this.data.sessions.filter(s => s.expiresAt > Date.now());
     this.data.sessions.push(session);
     await this.persist();
     return session;
+  }
+
+  // --- Biometrics & Passkeys ---
+  public createBiometricChallenge(userId?: string): BiometricChallenge {
+    if (!this.data.biometricChallenges) {
+      this.data.biometricChallenges = [];
+    }
+    // Clean expired challenges
+    const now = Date.now();
+    this.data.biometricChallenges = this.data.biometricChallenges.filter(c => c.expiresAt > now);
+
+    const challenge: BiometricChallenge = {
+      challengeId: `ch_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`,
+      challenge: crypto.randomBytes(32).toString('base64url'),
+      userId,
+      expiresAt: now + 5 * 60 * 1000 // 5 minutes
+    };
+    this.data.biometricChallenges.push(challenge);
+    return challenge;
+  }
+
+  public verifyBiometricChallenge(challengeId: string): boolean {
+    if (!this.data.biometricChallenges) return false;
+    const idx = this.data.biometricChallenges.findIndex(
+      c => c.challengeId === challengeId && c.expiresAt > Date.now()
+    );
+    if (idx !== -1) {
+      this.data.biometricChallenges.splice(idx, 1);
+      return true;
+    }
+    return false;
+  }
+
+  public async enrollBiometricCredential(
+    userId: string, 
+    credential: BiometricCredential
+  ): Promise<UserAccount | null> {
+    const user = this.getUserById(userId);
+    if (!user) return null;
+
+    if (!user.biometricCredentials) {
+      user.biometricCredentials = [];
+    }
+    // Remove existing credential with same ID if any
+    user.biometricCredentials = user.biometricCredentials.filter(c => c.credentialId !== credential.credentialId);
+    user.biometricCredentials.push(credential);
+    user.mfaEnabled = true;
+
+    await this.updateUser(userId, {
+      biometricCredentials: user.biometricCredentials,
+      mfaEnabled: true
+    });
+    return user;
+  }
+
+  public async enrollFacialBiometric(
+    userId: string, 
+    record: FacialBiometricRecord
+  ): Promise<UserAccount | null> {
+    const user = this.getUserById(userId);
+    if (!user) return null;
+
+    return this.updateUser(userId, {
+      facialBiometrics: record,
+      mfaEnabled: true
+    });
   }
 
   public getSession(token: string): UserSession | null {

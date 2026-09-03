@@ -1,0 +1,33 @@
+name: aura_aqi
+description: "Aura AQI — Atmospheric Intelligence & Clean-Air Platform"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_native_splash: ^2.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/aura_aqi_logo.png
+    - assets/images/branding.png
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: "assets/aura_aqi_logo.png"
+  branding: "assets/images/branding.png"
+  android_12:
+    color: "#ffffff"
+    image: "assets/aura_aqi_logo.png"
+  ios: true
+  web: false

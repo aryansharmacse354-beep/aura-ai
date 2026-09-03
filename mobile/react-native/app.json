@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Aura AQI",
+    "slug": "aura-aqi",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/aura-aqi-logo.png",
+    "splash": {
+      "image": "./assets/aura-aqi-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/aura-aqi-logo.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    }
+  }
+}

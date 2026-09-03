@@ -43,6 +43,7 @@ interface HeaderBarProps {
   setActiveTab: (tabId: string) => void;
   user: UserProfile;
   onOpenRoleModal?: () => void;
+  onOpenAuthModal?: () => void;
   onOpenInstallModal?: () => void;
   isInstalled?: boolean;
   hasInstallPrompt?: boolean;
@@ -510,6 +511,18 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           >
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
             <span className="hidden lg:inline">Role Deck</span>
+          </button>
+        )}
+
+        {/* Multi-Modal Biometric & Password Auth Trigger */}
+        {onOpenAuthModal && (
+          <button
+            onClick={onOpenAuthModal}
+            className="px-2.5 py-1.5 rounded-xl border border-cyan-500/30 bg-cyan-950/40 hover:bg-cyan-900/50 text-cyan-300 text-xs font-bold flex items-center space-x-1 transition-all cursor-pointer shadow-sm"
+            title="Open Biometric & Multi-Modal Sign-In (FIDO2 / OpenCV / PBKDF2)"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="hidden md:inline">Sign In</span>
           </button>
         )}
 
