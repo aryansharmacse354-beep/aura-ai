@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: aurapredict-ai-backend
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: ALLOWED_ORIGINS
+        sync: false
+        # Configure with your Vercel frontend URL, e.g. https://aurapredict-ai.vercel.app
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATA_DIR
+        value: ./data

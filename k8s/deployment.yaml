@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aurapredict-ai-deployment
+  namespace: default
+  labels:
+    app: aurapredict-ai
+    tier: microservice
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: aurapredict-ai
+  template:
+    metadata:
+      labels:
+        app: aurapredict-ai
+    spec:
+      containers:
+        - name: aurapredict-ai
+          image: aurapredict-ai:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DATA_DIR
+              value: "/app/data"
+          volumeMounts:
+            - name: storage-volume
+              mountPath: /app/data
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2048Mi"
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 2
+      volumes:
+        - name: storage-volume
+          persistentVolumeClaim:
+            claimName: aurapredict-data-pvc

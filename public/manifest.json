@@ -1,0 +1,50 @@
+{
+  "name": "AuraPredict AI — Atmospheric Intelligence & Clean-Air Platform",
+  "short_name": "AuraPredict",
+  "description": "Enterprise generative spatio-temporal air quality forecasting, atmospheric physics modeling, multi-turn AI reasoning, and proactive mitigation platform.",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#0B0F17",
+  "theme_color": "#10B981",
+  "orientation": "any",
+  "categories": ["weather", "utilities", "productivity", "health"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "3D Pollution Map",
+      "short_name": "Map",
+      "description": "View live atmospheric geospatial telemetry and GNN stations",
+      "url": "/?tab=map",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Gemini AI Chatbot",
+      "short_name": "Gemini Chat",
+      "description": "Multi-turn atmospheric intelligence and chemistry reasoning",
+      "url": "/?tab=gemini_chat",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Clean-Air Navigator",
+      "short_name": "Navigator",
+      "description": "Navigate routes with minimum particulate inhalation dosage",
+      "url": "/?tab=route_nav",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Health Shield",
+      "short_name": "Health",
+      "description": "Real-time respiratory and cardiopulmonary risk mitigation",
+      "url": "/?tab=health",
+      "icons": [{ "src": "/icon.svg", "sizes": "192x192" }]
+    }
+  ]
+}

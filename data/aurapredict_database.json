@@ -1,0 +1,636 @@
+{
+  "version": 1,
+  "users": [
+    {
+      "id": "usr_citizen_01",
+      "name": "Dr. Sarah Lin",
+      "email": "sarah.lin@aurapredict.org",
+      "role": "citizen",
+      "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "healthConditions": [
+        "asthma",
+        "outdoor_worker"
+      ],
+      "alertThresholdAQI": 120,
+      "mfaEnabled": true,
+      "mfaMethod": "app",
+      "savedLocations": [
+        {
+          "name": "Home Base",
+          "lat": 28.6139,
+          "lng": 77.209
+        },
+        {
+          "name": "Research Lab",
+          "lat": 28.5355,
+          "lng": 77.391
+        }
+      ],
+      "offlineRegions": [
+        "off_delhi_core",
+        "off_mumbai_metro"
+      ],
+      "lastLogin": "2026-09-03T14:12:16.728Z",
+      "createdAt": "2026-08-05T12:11:12.595Z",
+      "passwordHash": "d067e7a818bfc02613d2a9c0c4309705f986108288b4b360aaa7f9530885ab13487e2d0cdea85e6d25518f951a8cd9fe02d80fc4693e518c8d71939c3e22a6d2",
+      "salt": "23bff3de6f792d75f49c6ddc362a526d",
+      "updatedAt": "2026-09-03T14:12:16.728Z"
+    },
+    {
+      "id": "usr_planner_02",
+      "name": "Marcus Vance",
+      "email": "m.vance@citygov.gov",
+      "role": "planner",
+      "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      "healthConditions": [
+        "cardiovascular"
+      ],
+      "alertThresholdAQI": 150,
+      "mfaEnabled": true,
+      "mfaMethod": "security_key",
+      "savedLocations": [
+        {
+          "name": "Municipal City Hall",
+          "lat": 28.6304,
+          "lng": 77.2177
+        },
+        {
+          "name": "Industrial Monitoring Station 4",
+          "lat": 28.7041,
+          "lng": 77.1025
+        }
+      ],
+      "offlineRegions": [
+        "off_delhi_core"
+      ],
+      "lastLogin": "2026-08-10T18:45:00Z",
+      "createdAt": "2026-07-26T12:11:12.602Z",
+      "passwordHash": "7ee0b26cf67e93b25162ff2ca69d3b09ce80c62e888368ccbf5b245abe4dd5bd5b1f02c1c2dd194117e38381e49010e12831961961b9345957fed5b2fb21123b",
+      "salt": "7c4f1986c200b66776e475422b8e0714",
+      "updatedAt": "2026-08-15T12:11:12.602Z"
+    },
+    {
+      "id": "usr_test_1786795872666",
+      "name": "Dr. Jane Environmental",
+      "email": "test.researcher.1786795872659@aurapredict.ai",
+      "role": "researcher",
+      "healthConditions": [
+        "mild_asthma"
+      ],
+      "alertThresholdAQI": 110,
+      "mfaEnabled": true,
+      "mfaMethod": "app",
+      "savedLocations": [
+        "delhi_north"
+      ],
+      "offlineRegions": [
+        "delhi"
+      ],
+      "lastLogin": "2026-08-15T12:11:12.666Z",
+      "passwordHash": "f9eb075638d48c0d386fe560af27ccbd46416df54ee997a60b9085d0c8e436d83d46ef25a8eb5c20bed5c8e4853d5053cf4530fcefdf785b9d3bba99f519eed3",
+      "salt": "fac7efd71cfc7aeb1f4ea81b46628c21",
+      "createdAt": "2026-08-15T12:11:12.666Z",
+      "updatedAt": "2026-08-15T12:11:12.666Z"
+    },
+    {
+      "id": "usr_test_1786795896258",
+      "name": "Dr. Jane Environmental",
+      "email": "test.researcher.1786795896251@aurapredict.ai",
+      "role": "researcher",
+      "healthConditions": [
+        "mild_asthma"
+      ],
+      "alertThresholdAQI": 110,
+      "mfaEnabled": true,
+      "mfaMethod": "app",
+      "savedLocations": [
+        "delhi_north"
+      ],
+      "offlineRegions": [
+        "delhi"
+      ],
+      "lastLogin": "2026-08-15T12:11:36.258Z",
+      "passwordHash": "2c7aaed582dc9f2ef3f6cb0ab2be02ab829a947ace3e56124f7fc6c43214d33e1d2eb1c71ebba68e13dad80b4080f556415f005023a957162361fdadc40aee49",
+      "salt": "c9ff9df0eba592641862b1b6e00a9966",
+      "createdAt": "2026-08-15T12:11:36.259Z",
+      "updatedAt": "2026-08-15T12:11:36.259Z"
+    },
+    {
+      "id": "usr_test_1786795939218",
+      "name": "Dr. Jane Environmental",
+      "email": "test.researcher.1786795939211@aurapredict.ai",
+      "role": "analyst",
+      "healthConditions": [
+        "asthma"
+      ],
+      "alertThresholdAQI": 110,
+      "mfaEnabled": true,
+      "mfaMethod": "app",
+      "savedLocations": [
+        {
+          "name": "Research Lab",
+          "lat": 28.5355,
+          "lng": 77.391
+        }
+      ],
+      "offlineRegions": [
+        "off_delhi_core"
+      ],
+      "lastLogin": "2026-08-15T12:12:19.218Z",
+      "passwordHash": "4b4b49dd6fadea09602892d3895b1d8e00e7baed98572b628f03239ffbc2e25476956fa667ff3694e723fcedf4bd439ee764d7c932bcc34a784502846d9d3043",
+      "salt": "afd334ab512ea81c63328604bea223f2",
+      "createdAt": "2026-08-15T12:12:19.219Z",
+      "updatedAt": "2026-08-15T12:12:19.219Z"
+    },
+    {
+      "id": "usr_test_1788443068238",
+      "name": "Dr. Jane Environmental",
+      "email": "test.researcher.1788443068222@aurapredict.ai",
+      "role": "analyst",
+      "healthConditions": [
+        "asthma"
+      ],
+      "alertThresholdAQI": 110,
+      "mfaEnabled": true,
+      "mfaMethod": "app",
+      "savedLocations": [
+        {
+          "name": "Research Lab",
+          "lat": 28.5355,
+          "lng": 77.391
+        }
+      ],
+      "offlineRegions": [
+        "off_delhi_core"
+      ],
+      "lastLogin": "2026-09-03T13:44:28.238Z",
+      "passwordHash": "95ba593f0109e674fc6b0c680937a799ebcbe2b7be4d604d9e056320bc5a25db0e7b1f7baba41ab79508b377b19f3de093fec1ca380dbe9fa135c23b8c31ee8f",
+      "salt": "804a33883712fabfab287ba4fb3e5cec",
+      "createdAt": "2026-09-03T13:44:28.241Z",
+      "updatedAt": "2026-09-03T13:44:28.241Z"
+    },
+    {
+      "id": "usr_1788443069577_ate0u",
+      "name": "Dr. Integration Tester",
+      "email": "integration.tester.1788443069542@aurapredict.ai",
+      "role": "policymaker",
+      "healthConditions": [
+        "hypertension"
+      ],
+      "alertThresholdAQI": 130,
+      "mfaEnabled": true,
+      "mfaMethod": "app",
+      "savedLocations": [],
+      "offlineRegions": [
+        "off_delhi_core"
+      ],
+      "lastLogin": "2026-09-03T13:44:29.577Z",
+      "passwordHash": "ed22133323c4159dd2f4a0e278082c73d275fc353a7056a41e3e112cf7a8a16c567e4b47cf6c154397b4d4be29772eb82408f3b4f1e7e676e4f8bf46a79f8af7",
+      "salt": "e6a2a98e6878ab9bef94429409fe7cf8",
+      "createdAt": "2026-09-03T13:44:29.578Z",
+      "updatedAt": "2026-09-03T13:44:29.578Z"
+    },
+    {
+      "id": "usr_test_1788443954898",
+      "name": "Dr. Jane Environmental",
+      "email": "test.researcher.1788443954878@aurapredict.ai",
+      "role": "analyst",
+      "healthConditions": [
+        "asthma"
+      ],
+      "alertThresholdAQI": 110,
+      "mfaEnabled": true,
+      "mfaMethod": "app",
+      "savedLocations": [
+        {
+          "name": "Research Lab",
+          "lat": 28.5355,
+          "lng": 77.391
+        }
+      ],
+      "offlineRegions": [
+        "off_delhi_core"
+      ],
+      "lastLogin": "2026-09-03T13:59:14.898Z",
+      "passwordHash": "69018fde051c2b6fad5a83924ff9db7452b641d0ea47416bb31e0531b7447f41bb692859fba4a13bddc48b5e408eef47e3e2f541402226839018f779b9e3bd74",
+      "salt": "038a002df40d5734430b40ea126b070c",
+      "createdAt": "2026-09-03T13:59:14.905Z",
+      "updatedAt": "2026-09-03T13:59:14.905Z"
+    },
+    {
+      "id": "usr_1788443956174_sa1em",
+      "name": "Dr. Integration Tester",
+      "email": "integration.tester.1788443956140@aurapredict.ai",
+      "role": "policymaker",
+      "healthConditions": [
+        "hypertension"
+      ],
+      "alertThresholdAQI": 130,
+      "mfaEnabled": true,
+      "mfaMethod": "app",
+      "savedLocations": [],
+      "offlineRegions": [
+        "off_delhi_core"
+      ],
+      "lastLogin": "2026-09-03T13:59:16.174Z",
+      "passwordHash": "6f49d305ced308d9b950ce358b735c688e67404ca8c296891ea649495c06aa07f5d81eb2154b69835cbdb1c0790c0ab397e9a1eec7aba9b7ae25a9d76a0aa5e4",
+      "salt": "661a34c95833f50bca120b56c4e30e76",
+      "createdAt": "2026-09-03T13:59:16.175Z",
+      "updatedAt": "2026-09-03T13:59:16.175Z"
+    },
+    {
+      "id": "usr_test_1788444735401",
+      "name": "Dr. Jane Environmental",
+      "email": "test.researcher.1788444735383@aurapredict.ai",
+      "role": "analyst",
+      "healthConditions": [
+        "asthma"
+      ],
+      "alertThresholdAQI": 110,
+      "mfaEnabled": true,
+      "mfaMethod": "app",
+      "savedLocations": [
+        {
+          "name": "Research Lab",
+          "lat": 28.5355,
+          "lng": 77.391
+        }
+      ],
+      "offlineRegions": [
+        "off_delhi_core"
+      ],
+      "lastLogin": "2026-09-03T14:12:15.401Z",
+      "passwordHash": "a9841004c84ab4ad27c18c8433f2b5a39c7c4886f1304a2553b4cae65c7131eae20806bff4a5fc20ffa98e707bdd253a0dfcef74bdb188aa2d6c76e45ef8a142",
+      "salt": "67b85c95d469035d14da50399ec762ca",
+      "createdAt": "2026-09-03T14:12:15.406Z",
+      "updatedAt": "2026-09-03T14:12:15.406Z"
+    },
+    {
+      "id": "usr_1788444736687_j4xsj",
+      "name": "Dr. Integration Tester",
+      "email": "integration.tester.1788444736654@aurapredict.ai",
+      "role": "policymaker",
+      "healthConditions": [
+        "hypertension"
+      ],
+      "alertThresholdAQI": 130,
+      "mfaEnabled": true,
+      "mfaMethod": "app",
+      "savedLocations": [],
+      "offlineRegions": [
+        "off_delhi_core"
+      ],
+      "lastLogin": "2026-09-03T14:12:16.687Z",
+      "passwordHash": "8559df22d886e69b414e1b438a763ae0ee8ad25b109d9f8d6074a0ee34efd1461b8a45531b75f29f5f9115b4475f391c1b7f973010e49fe307e9b49e67f9198e",
+      "salt": "c9e59f6f333d7831810d7ea8782c59d6",
+      "createdAt": "2026-09-03T14:12:16.687Z",
+      "updatedAt": "2026-09-03T14:12:16.687Z"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "e8bee54c350c1095b0a3286860c15970b9b2c356ae2df5ff4bc919bd91347a25",
+      "userId": "usr_test_1",
+      "email": "test@aurapredict.ai",
+      "role": "researcher",
+      "expiresAt": 1789047868256,
+      "ip": "127.0.0.1",
+      "userAgent": "Vitest Agent"
+    },
+    {
+      "token": "4c90201fc447de76f8113c861e53d7c8ebbb0a05724a0fdb28b27ffa63378125",
+      "userId": "usr_1788443069577_ate0u",
+      "email": "integration.tester.1788443069542@aurapredict.ai",
+      "role": "policymaker",
+      "expiresAt": 1789047869588,
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "token": "a7f3c8df0766b2abcb37c9044d2d5ae61b6484a72c67180d7ef696dc56e4f486",
+      "userId": "usr_citizen_01",
+      "email": "sarah.lin@aurapredict.org",
+      "role": "citizen",
+      "expiresAt": 1789047869626,
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "token": "af5915837f4c171336f4f7a19d378904e0db379061603e9864fe8b7e684e9cfd",
+      "userId": "usr_test_1",
+      "email": "test@aurapredict.ai",
+      "role": "researcher",
+      "expiresAt": 1789048754922,
+      "ip": "127.0.0.1",
+      "userAgent": "Vitest Agent"
+    },
+    {
+      "token": "2204833b43e0621ad208bcd375bfaae0c62a099454a4232cd82f8d25902f3b5d",
+      "userId": "usr_1788443956174_sa1em",
+      "email": "integration.tester.1788443956140@aurapredict.ai",
+      "role": "policymaker",
+      "expiresAt": 1789048756188,
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "token": "86855a679bda550afdab5a75da263fccdf1a6c239e8ffa0fedcddafaeb3d6691",
+      "userId": "usr_citizen_01",
+      "email": "sarah.lin@aurapredict.org",
+      "role": "citizen",
+      "expiresAt": 1789048756227,
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "token": "a5ef0626ee91a181d1448bd33518711671df671592f4da89d0049ab9a22b9d80",
+      "userId": "usr_test_1",
+      "email": "test@aurapredict.ai",
+      "role": "researcher",
+      "expiresAt": 1789049535425,
+      "ip": "127.0.0.1",
+      "userAgent": "Vitest Agent"
+    },
+    {
+      "token": "b15df8905e34a9fb36f50521cb8cc714fd5e1b347b0cbd593b1d416c80d26503",
+      "userId": "usr_1788444736687_j4xsj",
+      "email": "integration.tester.1788444736654@aurapredict.ai",
+      "role": "policymaker",
+      "expiresAt": 1789049536697,
+      "ip": "::ffff:127.0.0.1"
+    },
+    {
+      "token": "7c6b38fb605edbfc9848c42d89e3e976c4e2a939cbfc1d02acf352ae29837442",
+      "userId": "usr_citizen_01",
+      "email": "sarah.lin@aurapredict.org",
+      "role": "citizen",
+      "expiresAt": 1789049536734,
+      "ip": "::ffff:127.0.0.1"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "sec-1788444752377-87554b",
+      "timestamp": "2026-09-03T14:12:32.377Z",
+      "event": "Clean Air Route Saved: Safe School Commute (42% exposure reduction)",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "GIS Route Engine",
+      "device": "AuraPredict Navigation Suite",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788444736767-a0dcad",
+      "timestamp": "2026-09-03T14:12:16.767Z",
+      "event": "Failed Authentication Attempt for sarah.lin@aurapredict.org",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "Security Core",
+      "device": "AuraPredict Web Client",
+      "status": "failed"
+    },
+    {
+      "id": "sec-1788444736741-56f00d",
+      "timestamp": "2026-09-03T14:12:16.741Z",
+      "event": "Authenticated via PBKDF2/SHA512 Session Handshake (sarah.lin@aurapredict.org)",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "Verified User Node",
+      "device": "AuraPredict Client Suite",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788444736704-f0c6f0",
+      "timestamp": "2026-09-03T14:12:16.704Z",
+      "event": "New Account Created (integration.tester.1788444736654@aurapredict.ai) with PBKDF2 Encryption",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "Encrypted Node Database",
+      "device": "AuraPredict Web Suite",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788444735437-9bccce",
+      "timestamp": "2026-09-03T14:12:15.438Z",
+      "event": "Automated Test Security Audit Handshake",
+      "ipAddress": "10.0.0.42",
+      "location": "Test Subnet",
+      "device": "CI Test Runner",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788443958713-7033b8",
+      "timestamp": "2026-09-03T13:59:18.713Z",
+      "event": "Clean Air Route Saved: Safe School Commute (42% exposure reduction)",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "GIS Route Engine",
+      "device": "AuraPredict Navigation Suite",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788443956268-21f8da",
+      "timestamp": "2026-09-03T13:59:16.268Z",
+      "event": "Failed Authentication Attempt for sarah.lin@aurapredict.org",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "Security Core",
+      "device": "AuraPredict Web Client",
+      "status": "failed"
+    },
+    {
+      "id": "sec-1788443956235-5d43aa",
+      "timestamp": "2026-09-03T13:59:16.236Z",
+      "event": "Authenticated via PBKDF2/SHA512 Session Handshake (sarah.lin@aurapredict.org)",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "Verified User Node",
+      "device": "AuraPredict Client Suite",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788443956193-13b193",
+      "timestamp": "2026-09-03T13:59:16.194Z",
+      "event": "New Account Created (integration.tester.1788443956140@aurapredict.ai) with PBKDF2 Encryption",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "Encrypted Node Database",
+      "device": "AuraPredict Web Suite",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788443954933-1345c8",
+      "timestamp": "2026-09-03T13:59:14.933Z",
+      "event": "Automated Test Security Audit Handshake",
+      "ipAddress": "10.0.0.42",
+      "location": "Test Subnet",
+      "device": "CI Test Runner",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788443072054-b431f1",
+      "timestamp": "2026-09-03T13:44:32.055Z",
+      "event": "Clean Air Route Saved: Safe School Commute (42% exposure reduction)",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "GIS Route Engine",
+      "device": "AuraPredict Navigation Suite",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788443069656-035d1b",
+      "timestamp": "2026-09-03T13:44:29.657Z",
+      "event": "Failed Authentication Attempt for sarah.lin@aurapredict.org",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "Security Core",
+      "device": "AuraPredict Web Client",
+      "status": "failed"
+    },
+    {
+      "id": "sec-1788443069633-04e8c2",
+      "timestamp": "2026-09-03T13:44:29.633Z",
+      "event": "Authenticated via PBKDF2/SHA512 Session Handshake (sarah.lin@aurapredict.org)",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "Verified User Node",
+      "device": "AuraPredict Client Suite",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788443069594-31c499",
+      "timestamp": "2026-09-03T13:44:29.594Z",
+      "event": "New Account Created (integration.tester.1788443069542@aurapredict.ai) with PBKDF2 Encryption",
+      "ipAddress": "::ffff:127.0.0.1",
+      "location": "Encrypted Node Database",
+      "device": "AuraPredict Web Suite",
+      "status": "success"
+    },
+    {
+      "id": "sec-1788443068268-89506b",
+      "timestamp": "2026-09-03T13:44:28.268Z",
+      "event": "Automated Test Security Audit Handshake",
+      "ipAddress": "10.0.0.42",
+      "location": "Test Subnet",
+      "device": "CI Test Runner",
+      "status": "success"
+    },
+    {
+      "id": "sec-1786795939224-ab75c5",
+      "timestamp": "2026-08-15T12:12:19.224Z",
+      "event": "Automated Test Security Audit Handshake",
+      "ipAddress": "10.0.0.42",
+      "location": "Test Subnet",
+      "device": "CI Test Runner",
+      "status": "success"
+    },
+    {
+      "id": "sec-1786795896263-a00f14",
+      "timestamp": "2026-08-15T12:11:36.263Z",
+      "event": "Automated Test Security Audit Handshake",
+      "ipAddress": "10.0.0.42",
+      "location": "Test Subnet",
+      "device": "CI Test Runner",
+      "status": "success"
+    },
+    {
+      "id": "sec-1786795872671-cd7def",
+      "timestamp": "2026-08-15T12:11:12.671Z",
+      "event": "Automated Test Security Audit Handshake",
+      "ipAddress": "10.0.0.42",
+      "location": "Test Subnet",
+      "device": "CI Test Runner",
+      "status": "success"
+    },
+    {
+      "id": "log_901",
+      "timestamp": "2026-08-11 02:15:02",
+      "event": "Multi-Factor Session Handshake",
+      "ipAddress": "192.168.1.104",
+      "location": "New Delhi, IN",
+      "device": "AuraPredict Web App / Chrome 128",
+      "status": "success"
+    },
+    {
+      "id": "log_902",
+      "timestamp": "2026-08-11 01:04:18",
+      "event": "Offline Map Region Package Cached",
+      "ipAddress": "192.168.1.104",
+      "location": "New Delhi, IN",
+      "device": "AuraPredict Native Service Worker",
+      "status": "success"
+    },
+    {
+      "id": "log_903",
+      "timestamp": "2026-08-10 22:30:45",
+      "event": "Password Token Re-authentication",
+      "ipAddress": "192.168.1.104",
+      "location": "New Delhi, IN",
+      "device": "AuraPredict Web App",
+      "status": "success"
+    },
+    {
+      "id": "log_904",
+      "timestamp": "2026-08-09 14:12:00",
+      "event": "API Session Key Rotation",
+      "ipAddress": "10.0.4.12",
+      "location": "Cloud Ingestion Microservice",
+      "device": "Server Node Express",
+      "status": "success"
+    }
+  ],
+  "savedSimulations": [],
+  "savedRoutes": [
+    {
+      "id": "route-1788444752367-7551a6",
+      "createdAt": "2026-09-03T14:12:32.367Z",
+      "userId": "usr_1788444736687_j4xsj",
+      "name": "Safe School Commute",
+      "origin": "Dwarka Sector 10",
+      "destination": "Connaught Place",
+      "distanceKm": 18.2,
+      "exposureReductionPct": 42,
+      "waypoints": [
+        {
+          "lat": 28.5921,
+          "lng": 77.046,
+          "aqi": 110
+        },
+        {
+          "lat": 28.6315,
+          "lng": 77.2167,
+          "aqi": 95
+        }
+      ]
+    },
+    {
+      "id": "route-1788443958706-4ca003",
+      "createdAt": "2026-09-03T13:59:18.706Z",
+      "userId": "usr_1788443956174_sa1em",
+      "name": "Safe School Commute",
+      "origin": "Dwarka Sector 10",
+      "destination": "Connaught Place",
+      "distanceKm": 18.2,
+      "exposureReductionPct": 42,
+      "waypoints": [
+        {
+          "lat": 28.5921,
+          "lng": 77.046,
+          "aqi": 110
+        },
+        {
+          "lat": 28.6315,
+          "lng": 77.2167,
+          "aqi": 95
+        }
+      ]
+    },
+    {
+      "id": "route-1788443072047-837fb3",
+      "createdAt": "2026-09-03T13:44:32.047Z",
+      "userId": "usr_1788443069577_ate0u",
+      "name": "Safe School Commute",
+      "origin": "Dwarka Sector 10",
+      "destination": "Connaught Place",
+      "distanceKm": 18.2,
+      "exposureReductionPct": 42,
+      "waypoints": [
+        {
+          "lat": 28.5921,
+          "lng": 77.046,
+          "aqi": 110
+        },
+        {
+          "lat": 28.6315,
+          "lng": 77.2167,
+          "aqi": 95
+        }
+      ]
+    }
+  ]
+}

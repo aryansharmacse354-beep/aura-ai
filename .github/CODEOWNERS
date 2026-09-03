@@ -1,0 +1,17 @@
+# AuraPredict AI - Code Ownership & Review Policy
+
+# Global Project Maintainers
+* @aryansharma aryansharmacse354@gmail.com
+
+# Core Machine Learning, Atmospheric Physics & Backend Services
+/server.ts @aryansharma
+/server/ @aryansharma
+/tests/ @aryansharma
+
+# Client UI & Visual Analytics
+/src/ @aryansharma
+
+# CI/CD, Containerization & Infrastructure
+/.github/ @aryansharma
+/Dockerfile @aryansharma
+/docker-compose.yml @aryansharma

@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  aurapredict-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aurapredict-ai-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - DATA_DIR=/app/data
+      - SESSION_SECRET=${SESSION_SECRET:-aura-secret-prod-key-2026}
+    volumes:
+      - aura-data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  aura-data:
+    driver: local

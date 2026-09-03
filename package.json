@@ -1,0 +1,80 @@
+{
+  "name": "aurapredict-ai",
+  "version": "1.0.0",
+  "description": "Generative Spatio-Temporal Air Quality Forecasting & Proactive Mitigation Platform",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx server.ts",
+    "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "start": "node dist/server.cjs",
+    "preview": "vite preview",
+    "clean": "rm -rf dist server.js",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "seed": "tsx scripts/seed.ts",
+    "prepare": "node -e \"if (process.env.NODE_ENV !== 'production' && !process.env.CI) { try { require('husky').install() } catch (e) {} }\"",
+    "check": "npm run lint && npm run test && npm run build"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx,js,jsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "@google/genai": "2.16.0",
+    "@tailwindcss/vite": "4.3.3",
+    "@types/d3": "7.4.3",
+    "@vitejs/plugin-react": "5.2.0",
+    "cors": "2.8.6",
+    "d3": "7.9.0",
+    "dotenv": "17.4.2",
+    "express": "4.22.2",
+    "express-rate-limit": "8.6.2",
+    "helmet": "8.3.0",
+    "leaflet": "1.9.4",
+    "lucide-react": "0.546.0",
+    "motion": "12.43.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "recharts": "3.10.1",
+    "vite": "6.4.3",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/cors": "2.8.19",
+    "@types/express": "4.17.25",
+    "@types/leaflet": "1.9.22",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@types/supertest": "7.2.1",
+    "@typescript-eslint/eslint-plugin": "7.18.0",
+    "@typescript-eslint/parser": "7.18.0",
+    "autoprefixer": "10.5.4",
+    "esbuild": "0.25.12",
+    "eslint": "8.57.1",
+    "eslint-config-prettier": "9.1.2",
+    "eslint-plugin-prettier": "5.5.6",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "4.6.2",
+    "husky": "8.0.3",
+    "lint-staged": "15.5.2",
+    "prettier": "3.9.6",
+    "supertest": "7.2.2",
+    "tailwindcss": "4.3.3",
+    "tsx": "4.23.12",
+    "typescript": "5.8.3",
+    "vite": "6.4.3",
+    "vitest": "4.1.10"
+  }
+}
