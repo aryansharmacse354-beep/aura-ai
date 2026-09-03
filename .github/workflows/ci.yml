@@ -24,20 +24,21 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run lint
         run: npm run lint
 
-      - name: Run tests
-        run: npm run test --if-present
+      - name: Run test suite
+        run: npm run test
 
-      - name: Build
+      - name: Production Build
         run: npm run build
 
       - name: Upload coverage (if exists)
-        if: success() && always()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage || ''
+          path: coverage/
+          if-no-files-found: ignore
