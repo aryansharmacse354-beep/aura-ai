@@ -30,7 +30,10 @@ import {
   LayoutGrid,
   Image as ImageIcon,
   Ratio,
-  Download
+  Download,
+  PanelLeft,
+  PanelRight,
+  PanelBottom
 } from 'lucide-react';
 import { CITIES_AQI_DATA } from '../data/mockData';
 import { UserProfile, ThemeMode } from '../types';
@@ -49,6 +52,12 @@ interface HeaderBarProps {
   hasInstallPrompt?: boolean;
   theme?: ThemeMode;
   onToggleTheme?: () => void;
+  leftPanelOpen?: boolean;
+  onToggleLeftPanel?: () => void;
+  rightPanelOpen?: boolean;
+  onToggleRightPanel?: () => void;
+  bottomPanelOpen?: boolean;
+  onToggleBottomPanel?: () => void;
 }
 
 interface DeckGroup {
@@ -123,11 +132,18 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   setActiveTab,
   user,
   onOpenRoleModal,
+  onOpenAuthModal,
   onOpenInstallModal,
   isInstalled = false,
   hasInstallPrompt = false,
   theme = 'slate',
-  onToggleTheme
+  onToggleTheme,
+  leftPanelOpen = true,
+  onToggleLeftPanel,
+  rightPanelOpen = true,
+  onToggleRightPanel,
+  bottomPanelOpen = true,
+  onToggleBottomPanel
 }) => {
   const [utcTime, setUtcTime] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -546,6 +562,45 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             )}
           </button>
         )}
+
+        {/* Panel Layout Control Toggles */}
+        <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-0.5 space-x-0.5" title="Workspace Panel Layout">
+          {onToggleLeftPanel && (
+            <button
+              onClick={onToggleLeftPanel}
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                leftPanelOpen ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title={leftPanelOpen ? 'Hide Left Panel (Spatial & Mapping)' : 'Show Left Panel (Spatial & Mapping)'}
+            >
+              <PanelLeft className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {onToggleRightPanel && (
+            <button
+              onClick={onToggleRightPanel}
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                rightPanelOpen ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title={rightPanelOpen ? 'Hide Right Panel (AI Copilot & Operations)' : 'Show Right Panel (AI Copilot & Operations)'}
+            >
+              <PanelRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {onToggleBottomPanel && (
+            <button
+              onClick={onToggleBottomPanel}
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                bottomPanelOpen ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title={bottomPanelOpen ? 'Hide Bottom Panel (Telemetry & Scrubber)' : 'Show Bottom Panel (Telemetry & Scrubber)'}
+            >
+              <PanelBottom className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
 
         {/* Global Theme Mode Toggle Button */}
         {onToggleTheme && (

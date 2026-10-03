@@ -2,6 +2,8 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sidebar } from './components/Sidebar';
 import { HeaderBar } from './components/HeaderBar';
+import { RightPanel } from './components/RightPanel';
+import { BottomPanel } from './components/BottomPanel';
 import { AqiNotificationToast } from './components/AqiNotificationToast';
 import { AQILogo } from './components/AQILogo';
 import { TabLoadingSkeleton } from './components/TabLoadingSkeleton';
@@ -47,6 +49,12 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('map');
   const [selectedCityId, setSelectedCityId] = useState('delhi');
   const [isOffline, setIsOffline] = useState(offlineStorage.getForcedOffline());
+
+  // 4-Panel Layout State
+  const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true);
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
+  const [isBottomPanelOpen, setIsBottomPanelOpen] = useState(true);
+
   const [theme, setTheme] = useState<ThemeMode>(() => {
     try {
       const savedTheme = localStorage.getItem('aurapredict_theme') as ThemeMode;
@@ -315,6 +323,12 @@ export default function App() {
         hasInstallPrompt={!!deferredPrompt}
         theme={theme}
         onToggleTheme={handleToggleTheme}
+        leftPanelOpen={isLeftPanelOpen}
+        onToggleLeftPanel={() => setIsLeftPanelOpen(prev => !prev)}
+        rightPanelOpen={isRightPanelOpen}
+        onToggleRightPanel={() => setIsRightPanelOpen(prev => !prev)}
+        bottomPanelOpen={isBottomPanelOpen}
+        onToggleBottomPanel={() => setIsBottomPanelOpen(prev => !prev)}
       />
 
       <div className="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden relative">
@@ -327,20 +341,23 @@ export default function App() {
         />
 
         {/* Left Sidebar Navigation Panel */}
-        <Sidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          isOffline={isOffline}
-          setIsOffline={handleSetOffline}
-          gpsActive={gpsActive}
-          selectedCity={selectedCityId}
-          setSelectedCity={setSelectedCityId}
-          user={user}
-          onRoleChange={handleRoleChange}
-          onOpenInstallModal={() => setShowInstallModal(true)}
-          isInstalled={isInstalled}
-          hasInstallPrompt={!!deferredPrompt}
-        />
+        {isLeftPanelOpen && (
+          <Sidebar
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            isOffline={isOffline}
+            setIsOffline={handleSetOffline}
+            gpsActive={gpsActive}
+            selectedCity={selectedCityId}
+            setSelectedCity={setSelectedCityId}
+            user={user}
+            onRoleChange={handleRoleChange}
+            onOpenInstallModal={() => setShowInstallModal(true)}
+            isInstalled={isInstalled}
+            hasInstallPrompt={!!deferredPrompt}
+            onCollapse={() => setIsLeftPanelOpen(false)}
+          />
+        )}
 
         {/* Main Content View Container with Ambient AQI Logo Watermark Backdrop */}
         <main className="flex-1 h-full min-w-0 overflow-hidden p-3 md:p-5 flex flex-col relative">
@@ -501,6 +518,16 @@ export default function App() {
           </AnimatePresence>
         </main>
 
+        {/* Right Panel: AI Copilot & Operations Inspector */}
+        <RightPanel
+          currentCityData={currentCityData}
+          user={user}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          isOpen={isRightPanelOpen}
+          onToggleOpen={() => setIsRightPanelOpen(prev => !prev)}
+        />
+
         {/* Multi-User Role Customized Functions Modal */}
         {showRoleModal && (
           <Suspense fallback={null}>
@@ -531,7 +558,18 @@ export default function App() {
           onNativeInstall={handleNativeInstall}
           isInstalled={isInstalled}
         />
+      </div>
+
+      {/* Persistent Bottom Panel: Telemetry Ticker & Forecast Scrubber */}
+      {isBottomPanelOpen && (
+        <BottomPanel
+          currentCityData={currentCityData}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onTriggerForecastAI={handleTriggerAIPrediction}
+          isLoadingAI={isLoadingForecastAI}
+        />
+      )}
     </div>
-  </div>
-);
+  );
 }

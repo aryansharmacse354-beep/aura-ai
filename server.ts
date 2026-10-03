@@ -245,6 +245,8 @@ export function cleanAndParseJSON<T>(text: string | undefined, fallback: T): T {
 // Resilient Gemini Execution with Candidate Cascade & Automatic Retry
 // Using currently supported Gemini SDK models: 'gemini-3.7-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'
 export const CANDIDATE_GEMINI_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-3.5-flash',
   'gemini-3.7-flash',
   'gemini-3.1-flash-lite',
   'gemini-flash-latest'

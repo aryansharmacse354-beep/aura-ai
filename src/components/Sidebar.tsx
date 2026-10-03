@@ -53,6 +53,7 @@ interface SidebarProps {
   onOpenInstallModal?: () => void;
   isInstalled?: boolean;
   hasInstallPrompt?: boolean;
+  onCollapse?: () => void;
 }
 
 export interface NavCategory {
@@ -127,7 +128,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onVoiceReportTrigger,
   onOpenInstallModal,
   isInstalled = false,
-  hasInstallPrompt = false
+  hasInstallPrompt = false,
+  onCollapse
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -319,7 +321,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {/* Collapse Toggle Button */}
             <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={() => {
+                if (onCollapse && !isCollapsed) {
+                  onCollapse();
+                } else {
+                  setIsCollapsed(!isCollapsed);
+                }
+              }}
               className="hidden md:flex p-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-slate-100 hover:bg-slate-800 border border-slate-800 transition-colors ml-auto"
               title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
             >
@@ -475,6 +483,42 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               </div>
             ))}
+
+            {/* Live Monitoring Stations Switcher Widget */}
+            {!isCollapsed && (
+              <div className="pt-2 border-t border-slate-800/80">
+                <div className="flex items-center justify-between px-2 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="w-3 h-3 text-emerald-400" />
+                    <span>Sensor Stations</span>
+                  </div>
+                  <span className="text-[9px] font-mono text-emerald-400">Live</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1 px-1">
+                  {CITIES_AQI_DATA.slice(0, 6).map((city) => {
+                    const isSelected = selectedCity === city.cityId;
+                    return (
+                      <button
+                        key={city.cityId}
+                        onClick={() => setSelectedCity(city.cityId)}
+                        className={`p-1.5 rounded-lg border text-left flex items-center justify-between text-[11px] transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 font-bold'
+                            : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white'
+                        }`}
+                      >
+                        <span className="truncate max-w-[70px]">{city.cityName}</span>
+                        <span className={`text-[10px] font-mono px-1 py-0.2 rounded font-bold ${
+                          city.aqi > 250 ? 'bg-rose-500/20 text-rose-300' : city.aqi > 150 ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-300'
+                        }`}>
+                          {city.aqi}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </nav>
         </div>
 
