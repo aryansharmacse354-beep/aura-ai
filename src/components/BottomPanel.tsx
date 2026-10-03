@@ -52,6 +52,19 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
     { id: '72h', label: '+72H', aqi: Math.round(currentCityData.aqi * 0.82), trend: 'stable' }
   ];
 
+  const getPollutantVal = (name: string, fallback: number): number => {
+    if (Array.isArray(currentCityData.pollutants)) {
+      const p = currentCityData.pollutants.find(item => item.name === name);
+      return p ? p.value : fallback;
+    }
+    return (currentCityData.pollutants as any)?.[name] ?? fallback;
+  };
+
+  const pm25Val = getPollutantVal('PM2.5', 185);
+  const pm10Val = getPollutantVal('PM10', 260);
+  const no2Val = getPollutantVal('NO2', 45);
+  const o3Val = getPollutantVal('O3', 55);
+
   return (
     <footer className="w-full bg-slate-950/95 backdrop-blur-md border-t border-slate-800 text-xs z-30 transition-all duration-200">
       {/* Expanded Ticker Drawer */}
@@ -66,23 +79,23 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
             <div className="grid grid-cols-3 gap-1.5 text-center">
               <div className="p-1.5 rounded bg-slate-950 border border-slate-800">
                 <span className="text-[10px] text-slate-400 block">PM2.5 / Limit</span>
-                <span className="font-bold text-slate-200">{currentCityData.pollutants.pm25}</span>
+                <span className="font-bold text-slate-200">{pm25Val}</span>
                 <span className="text-[9px] text-rose-400 block font-mono">
-                  {Math.round((currentCityData.pollutants.pm25 / 15) * 100)}% WHO
+                  {Math.round((pm25Val / 15) * 100)}% WHO
                 </span>
               </div>
               <div className="p-1.5 rounded bg-slate-950 border border-slate-800">
                 <span className="text-[10px] text-slate-400 block">PM10 / Limit</span>
-                <span className="font-bold text-slate-200">{currentCityData.pollutants.pm10}</span>
+                <span className="font-bold text-slate-200">{pm10Val}</span>
                 <span className="text-[9px] text-amber-400 block font-mono">
-                  {Math.round((currentCityData.pollutants.pm10 / 45) * 100)}% WHO
+                  {Math.round((pm10Val / 45) * 100)}% WHO
                 </span>
               </div>
               <div className="p-1.5 rounded bg-slate-950 border border-slate-800">
                 <span className="text-[10px] text-slate-400 block">NO2 / Limit</span>
-                <span className="font-bold text-slate-200">{currentCityData.pollutants.no2}</span>
+                <span className="font-bold text-slate-200">{no2Val}</span>
                 <span className="text-[9px] text-emerald-400 block font-mono">
-                  {Math.round((currentCityData.pollutants.no2 / 25) * 100)}% WHO
+                  {Math.round((no2Val / 25) * 100)}% WHO
                 </span>
               </div>
             </div>
@@ -169,16 +182,16 @@ export const BottomPanel: React.FC<BottomPanelProps> = ({
 
           <div className="hidden sm:flex items-center gap-1.5 font-mono text-[11px] text-slate-400 shrink-0">
             <span className="px-1.5 py-0.5 rounded bg-slate-900/80 border border-slate-800">
-              PM2.5: <strong className="text-slate-200">{currentCityData.pollutants.pm25}</strong>
+              PM2.5: <strong className="text-slate-200">{pm25Val}</strong>
             </span>
             <span className="px-1.5 py-0.5 rounded bg-slate-900/80 border border-slate-800">
-              PM10: <strong className="text-slate-200">{currentCityData.pollutants.pm10}</strong>
+              PM10: <strong className="text-slate-200">{pm10Val}</strong>
             </span>
             <span className="px-1.5 py-0.5 rounded bg-slate-900/80 border border-slate-800">
-              NO2: <strong className="text-slate-200">{currentCityData.pollutants.no2}</strong>
+              NO2: <strong className="text-slate-200">{no2Val}</strong>
             </span>
             <span className="px-1.5 py-0.5 rounded bg-slate-900/80 border border-slate-800">
-              O3: <strong className="text-slate-200">{currentCityData.pollutants.o3}</strong>
+              O3: <strong className="text-slate-200">{o3Val}</strong>
             </span>
           </div>
         </div>

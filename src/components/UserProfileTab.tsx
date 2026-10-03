@@ -217,6 +217,30 @@ export const UserProfileTab: React.FC<UserProfileTabProps> = ({
       'Calibrate Sensor Nodes & In-Situ Monitoring Telemetry',
       'Cache High-Resolution Offline Vector Tiles for Field Patrols',
       'Receive Emergency Smog Threshold Breach Push Dispatch'
+    ],
+    epidemiologist: [
+      'Population Health Impact Modeling & Exceedance Tracking',
+      'Respiratory & Cardiovascular Vulnerability Cohort Analysis',
+      'WHO 2021 Air Quality Guideline Threshold Audit',
+      'Syndromic Health Advisory Generation & Clinical Risk Scenarios'
+    ],
+    city_planner: [
+      'Zoning & Low-Emission Traffic Corridor Simulation',
+      'Urban Green Canopy & Industrial Buffer Placement',
+      'Micro-Transit Rerouting during Severe Smog Episodes',
+      'Capital Infrastructure Environmental Impact Scoring'
+    ],
+    industrial_auditor: [
+      'Continuous Emission Monitoring System (CEMS) Stack Ingestion',
+      'Industrial Stack Flare Emission Plume Dispersion Audits',
+      'Regulatory Compliance Threshold Exceedance Logging',
+      'Factory Point-Source Attribution & Penalty Assessment'
+    ],
+    station_operator: [
+      'Reference-Grade Beta Attenuation Monitor (BAM) Zero/Span Calibration',
+      'Optical Particle Counter (OPC) Drift Diagnostics & Flow Check',
+      'Edge Sensor Hardware Telemetry & Heartbeat Monitoring',
+      'Real-time Raw Sensor Stream QA/QC & Flag Override'
     ]
   };
 

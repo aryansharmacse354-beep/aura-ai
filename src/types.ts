@@ -1,4 +1,12 @@
-export type UserRole = 'citizen' | 'planner' | 'analyst' | 'field_officer';
+export type UserRole = 
+  | 'citizen' 
+  | 'planner' 
+  | 'analyst' 
+  | 'field_officer' 
+  | 'epidemiologist' 
+  | 'city_planner' 
+  | 'industrial_auditor' 
+  | 'station_operator';
 
 export type HealthCondition = 
   | 'asthma'
@@ -22,6 +30,8 @@ export interface UserProfile {
   offlineRegions: string[];
   lastLogin: string;
   createdAt: string;
+  mfaEnabled?: boolean;
+  mfaMethod?: string;
 }
 
 export interface SecurityAuditLog {

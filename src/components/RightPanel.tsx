@@ -75,11 +75,12 @@ export const RightPanel: React.FC<RightPanelProps> = ({
       );
       setChatHistory(prev => [...prev, { role: 'model', text: reply, modelUsed }]);
     } catch (err) {
+      const pm25Val = currentCityData.pollutants?.find(p => p.name === 'PM2.5')?.value || 185;
       setChatHistory(prev => [
         ...prev, 
         { 
           role: 'model', 
-          text: `Inversion layer at ${currentCityData.weather.boundaryLayerHeightM}m is concentrating PM2.5 at ${currentCityData.pollutants.pm25} µg/m³. Urgent mitigation recommended.`, 
+          text: `Inversion layer at ${currentCityData.weather.boundaryLayerHeightM}m is concentrating PM2.5 at ${pm25Val} µg/m³. Urgent mitigation recommended.`, 
           modelUsed: 'physics-fallback' 
         }
       ]);
@@ -446,7 +447,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
                     <span>Wind Vector</span>
                   </div>
                   <span className="text-sm font-mono font-bold text-slate-100">
-                    {currentCityData.weather.windSpeedKmH} km/h {currentCityData.weather.windDirection}
+                    {currentCityData.weather.windSpeedKmh} km/h {currentCityData.weather.windDirectionDeg}°
                   </span>
                 </div>
 
@@ -456,7 +457,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
                     <span>Temperature</span>
                   </div>
                   <span className="text-sm font-mono font-bold text-slate-100">
-                    {currentCityData.weather.temperatureC}°C
+                    {currentCityData.weather.tempC}°C
                   </span>
                 </div>
 
@@ -466,7 +467,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
                     <span>Humidity</span>
                   </div>
                   <span className="text-sm font-mono font-bold text-slate-100">
-                    {currentCityData.weather.humidityPercent}%
+                    {currentCityData.weather.humidity}%
                   </span>
                 </div>
               </div>

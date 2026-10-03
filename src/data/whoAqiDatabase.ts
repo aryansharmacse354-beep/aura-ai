@@ -9,7 +9,7 @@ export interface WhoAirQualityGuideline {
   aqg2021Level: number; // µg/m³
   interimTarget1: number;
   interimTarget2: number;
-  interimTarget3: number;
+  interimTarget3?: number;
   interimTarget4?: number;
   healthEffectNote: string;
 }

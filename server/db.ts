@@ -206,13 +206,13 @@ export class PersistentDatabase {
     return this.data.users.find(u => u.email.toLowerCase() === email.toLowerCase());
   }
 
-  public async createUser(account: Omit<UserAccount, 'createdAt' | 'updatedAt' | 'lastLogin'>): Promise<UserAccount> {
+  public async createUser(account: Omit<UserAccount, 'createdAt' | 'updatedAt' | 'lastLogin'> & { lastLogin?: string; createdAt?: string; updatedAt?: string }): Promise<UserAccount> {
     const now = new Date().toISOString();
     const newUser: UserAccount = {
       ...account,
-      createdAt: now,
-      updatedAt: now,
-      lastLogin: now
+      createdAt: account.createdAt || now,
+      updatedAt: account.updatedAt || now,
+      lastLogin: account.lastLogin || now
     };
     this.data.users.push(newUser);
     await this.persist();

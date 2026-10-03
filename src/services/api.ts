@@ -6,7 +6,7 @@
 // Resolves backend API URL in production (e.g. https://aurapredict-backend.onrender.com)
 // In local development or unified builds, falls back to relative root or window.location.origin
 export const API_BASE_URL: string = (() => {
-  const envUrl = import.meta.env.VITE_API_URL;
+  const envUrl = (import.meta as any).env?.VITE_API_URL;
   if (envUrl && typeof envUrl === 'string' && envUrl.trim() !== '') {
     return envUrl.trim().replace(/\/+$/, ''); // Remove trailing slashes
   }
