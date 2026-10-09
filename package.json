@@ -48,7 +48,7 @@
     "react-dom": "19.2.8",
     "recharts": "3.10.1",
     "vite": "6.4.3",
-    "zod": "4.4.3"
+    "zod": "4.5.4"
   },
   "devDependencies": {
     "@types/cors": "2.8.19",
