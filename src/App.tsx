@@ -1,5 +1,4 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { Sidebar } from './components/Sidebar';
 import { HeaderBar } from './components/HeaderBar';
 import { RightPanel } from './components/RightPanel';
@@ -368,15 +367,10 @@ export default function App() {
             </div>
           </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 6, scale: 0.995 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.995 }}
-              transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
-              className="w-full h-full min-h-0 flex-1 flex flex-col overflow-hidden relative z-10"
-            >
+          <div
+            key={activeTab}
+            className="w-full h-full min-h-0 flex-1 flex flex-col overflow-hidden relative z-10 transition-opacity duration-200"
+          >
               <ErrorBoundary 
                 fallbackTitle={`${activeTab.replace('_', ' ').toUpperCase()} Tab Error`} 
                 onReset={() => setActiveTab('map')}
@@ -514,8 +508,7 @@ export default function App() {
                 )}
                 </Suspense>
               </ErrorBoundary>
-            </motion.div>
-          </AnimatePresence>
+          </div>
         </main>
 
         {/* Right Panel: AI Copilot & Operations Inspector */}

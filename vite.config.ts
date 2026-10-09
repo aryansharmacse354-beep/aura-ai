@@ -17,7 +17,6 @@ export default defineConfig(() => {
         '@hooks': path.resolve(__dirname, 'src/hooks'),
         '@contexts': path.resolve(__dirname, 'src/contexts'),
         '@data': path.resolve(__dirname, 'src/data'),
-        'framer-motion': path.resolve(__dirname, 'node_modules/framer-motion/dist/framer-motion.js'),
       },
     },
     server: {
